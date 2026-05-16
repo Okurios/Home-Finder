@@ -1,0 +1,158 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          String    @default("user")   // user | admin | supervisor
+  status        String    @default("Active") // Active | Suspended
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  otpCodes      OtpCode[]
+  inquiries     Inquiry[]
+  viewings      ViewingRequest[]
+  favourites    Favourite[]
+  auditLogs     AuditLog[]
+  propertiesCreated Property[] @relation("CreatedBy")
+  propertiesUpdated Property[] @relation("UpdatedBy")
+  inquiryReplies InquiryReply[]
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Property {
+  id          Int      @id @default(autoincrement())
+  title       String
+  type        String   // house | apartment | commercial | land
+  status      String   // For Sale | For Rent
+  price       Float
+  address     String
+  city        String   @default("")
+  beds        Int      @default(0)
+  baths       Int      @default(0)
+  sqft        Int      @default(0)
+  parking     Boolean  @default(false)
+  description String   @default("")
+  features    String   @default("[]") // JSON array stored as string
+  lat         Float    @default(0)
+  lng         Float    @default(0)
+  featured    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById Int?
+  updatedById Int?
+
+  createdBy   User?    @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedBy   User?    @relation("UpdatedBy", fields: [updatedById], references: [id])
+  images      PropertyImage[]
+  inquiries   Inquiry[]
+  viewings    ViewingRequest[]
+  favourites  Favourite[]
+}
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  url        String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Inquiry {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  propertyId Int
+  message    String
+  status     String   @default("Pending") // Pending | Responded | Closed
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  replies    InquiryReply[]
+}
+
+model InquiryReply {
+  id        Int      @id @default(autoincrement())
+  inquiryId Int
+  adminId   Int
+  message   String
+  createdAt DateTime @default(now())
+
+  inquiry   Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  admin     User     @relation(fields: [adminId], references: [id])
+}
+
+model ViewingRequest {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  propertyId Int
+  date       String
+  time       String
+  message    String   @default("")
+  status     String   @default("Pending") // Pending | Confirmed | Rescheduled | Closed
+  adminNote  String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Favourite {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  propertyId Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  detail    String   @default("")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

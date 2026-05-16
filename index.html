@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeFinder — Find Your Perfect Property</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+    </a>
+    <nav class="navbar-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="search.html">Browse</a>
+      <a href="search.html?type=buy">Buy</a>
+      <a href="search.html?type=rent">Rent</a>
+      <a href="search.html?type=commercial">Commercial</a>
+    </nav>
+    <div class="navbar-actions" id="navActions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="navbar-hamburger" onclick="toggleMobileMenu()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container hero-content">
+    <h1 class="hero-title">Find Your Dream<br/><span>Home Today</span></h1>
+    <p class="hero-sub">Explore thousands of properties — houses, apartments, and commercial spaces across the country.</p>
+
+    <!-- Zillow-style search box -->
+    <div class="search-box" style="max-width:680px;">
+      <div class="search-tabs">
+        <button class="search-tab active" data-mode="buy">Buy</button>
+        <button class="search-tab" data-mode="rent">Rent</button>
+        <button class="search-tab" data-mode="commercial">Commercial</button>
+      </div>
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" id="heroSearch" type="text" placeholder="City, neighbourhood, or postcode…" />
+      </div>
+      <button class="btn btn-primary search-btn" onclick="doSearch()">Search</button>
+    </div>
+
+    <!-- Popular searches -->
+    <div class="tags-row" style="margin-top:20px;">
+      <span style="color:rgba(255,255,255,0.6);font-size:0.82rem;align-self:center;">Popular:</span>
+      <a href="search.html?q=London" class="tag" style="background:rgba(255,255,255,0.15);color:#fff;">London</a>
+      <a href="search.html?q=Manchester" class="tag" style="background:rgba(255,255,255,0.15);color:#fff;">Manchester</a>
+      <a href="search.html?q=Birmingham" class="tag" style="background:rgba(255,255,255,0.15);color:#fff;">Birmingham</a>
+      <a href="search.html?q=Edinburgh" class="tag" style="background:rgba(255,255,255,0.15);color:#fff;">Edinburgh</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ROW ===== -->
+<section class="section-sm" style="background:#fff;">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value">12,400+</div>
+        <div class="stat-label">Active Listings</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">8,200+</div>
+        <div class="stat-label">Happy Clients</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">380+</div>
+        <div class="stat-label">Cities Covered</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">98%</div>
+        <div class="stat-label">Satisfaction Rate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURED LISTINGS ===== -->
+<section class="section" style="background:var(--bg);">
+  <div class="container">
+    <div class="section-header flex-between">
+      <div>
+        <h2>Featured Properties</h2>
+        <p>Hand-picked listings updated daily</p>
+      </div>
+      <a href="search.html" class="btn btn-outline btn-sm">View All</a>
+    </div>
+
+    <!-- Filter tags -->
+    <div class="tags-row" style="margin-bottom:24px;">
+      <span class="tag active" data-filter="all">All</span>
+      <span class="tag" data-filter="house">Houses</span>
+      <span class="tag" data-filter="apartment">Apartments</span>
+      <span class="tag" data-filter="commercial">Commercial</span>
+      <span class="tag" data-filter="land">Land</span>
+    </div>
+
+    <div class="grid-3" id="featuredGrid">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ===== BROWSE BY CATEGORY ===== -->
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2>Explore by Property Type</h2>
+      <p>Whether you're buying, renting, or investing — we have you covered</p>
+    </div>
+    <div class="grid-4">
+      <a href="search.html?type=house" class="category-card">
+        <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=80" alt="Houses" />
+        <div class="category-card-label"><h4>Houses</h4><span>4,200+ listings</span></div>
+      </a>
+      <a href="search.html?type=apartment" class="category-card">
+        <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80" alt="Apartments" />
+        <div class="category-card-label"><h4>Apartments</h4><span>5,800+ listings</span></div>
+      </a>
+      <a href="search.html?type=commercial" class="category-card">
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80" alt="Commercial" />
+        <div class="category-card-label"><h4>Commercial</h4><span>1,400+ listings</span></div>
+      </a>
+      <a href="search.html?type=land" class="category-card">
+        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80" alt="Land" />
+        <div class="category-card-label"><h4>Land &amp; Plots</h4><span>980+ listings</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="section how-it-works">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2>How HomeFinder Works</h2>
+      <p>Your journey to the perfect property in three easy steps</p>
+    </div>
+    <div class="grid-3" style="margin-top:16px;">
+      <div class="step-card">
+        <span class="step-number">1</span>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <h3>Search &amp; Filter</h3>
+        <p class="text-muted" style="margin-top:8px;font-size:0.92rem;">Use our powerful search and filters to find properties that match your exact criteria — location, price, size, and more.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">2</span>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <h3>Book a Viewing</h3>
+        <p class="text-muted" style="margin-top:8px;font-size:0.92rem;">Schedule a property viewing at your convenience. Our team confirms appointments quickly and keeps you informed every step of the way.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">3</span>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+            <path d="M9 21V12h6v9"/>
+          </svg>
+        </div>
+        <h3>Move In</h3>
+        <p class="text-muted" style="margin-top:8px;font-size:0.92rem;">Once you've found your perfect property, our administrators handle the paperwork and guide you through the final steps.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEW LISTINGS STRIP ===== -->
+<section class="section" style="background:var(--bg);">
+  <div class="container">
+    <div class="section-header flex-between">
+      <div>
+        <h2>Recently Added</h2>
+        <p>Fresh on the market this week</p>
+      </div>
+      <a href="search.html?sort=newest" class="btn btn-outline btn-sm">See More</a>
+    </div>
+    <div class="grid-4" id="newListingsGrid"></div>
+  </div>
+</section>
+
+<!-- ===== CTA BANNER ===== -->
+<section style="background:var(--primary);padding:64px 0;">
+  <div class="container text-center">
+    <h2 style="color:#fff;font-size:2rem;">Ready to Find Your Home?</h2>
+    <p style="color:rgba(255,255,255,0.8);margin-top:10px;font-size:1rem;">Create a free account to save favourites, submit inquiries and book viewings.</p>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap;">
+      <a href="register.html" class="btn btn-accent btn-lg">Create Free Account</a>
+      <a href="search.html" class="btn btn-outline-white btn-lg">Browse Listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Home<span>Finder</span></div>
+        <p class="footer-desc">Your trusted partner in finding the perfect property. Thousands of verified listings updated daily.</p>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <div class="footer-links">
+          <a href="search.html?type=house">Houses for Sale</a>
+          <a href="search.html?type=apartment">Apartments</a>
+          <a href="search.html?type=commercial">Commercial</a>
+          <a href="search.html?type=land">Land &amp; Plots</a>
+        </div>
+      </div>
+      <div>
+        <h5>Account</h5>
+        <div class="footer-links">
+          <a href="register.html">Register</a>
+          <a href="login.html">Sign In</a>
+          <a href="dashboard.html">Dashboard</a>
+        </div>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <div class="footer-links">
+          <a href="#">About Us</a>
+          <a href="#">Contact</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 HomeFinder Portal. All rights reserved.</span>
+      <span>GDPR Compliant · Secure · Trusted</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  // ---- Search tabs ----
+  document.querySelectorAll('.search-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.search-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  function doSearch() {
+    const q = document.getElementById('heroSearch').value.trim();
+    const mode = document.querySelector('.search-tab.active')?.dataset.mode || 'buy';
+    window.location.href = `search.html?q=${encodeURIComponent(q)}&type=${mode}`;
+  }
+  document.getElementById('heroSearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // ---- Filter tags ----
+  document.querySelectorAll('.tag[data-filter]').forEach(tag => {
+    tag.addEventListener('click', () => {
+      document.querySelectorAll('.tag[data-filter]').forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      renderFeatured(tag.dataset.filter);
+    });
+  });
+
+  // ---- Render featured (loads from API) ----
+  async function renderFeatured(filter = 'all') {
+    const grid = document.getElementById('featuredGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Loading properties…</div>';
+    const params = new URLSearchParams({ limit: 6, sort: 'newest' });
+    if (filter !== 'all') params.set('type', filter);
+    const res = await api('/api/properties?' + params.toString());
+    if (!res) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">Could not load properties.</div>'; return; }
+    const data = await res.json();
+    const props = (data.properties || []).map(normalizeProperty);
+    if (!props.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No properties found.</div>'; return; }
+    grid.innerHTML = props.map(p => propertyCard(p)).join('');
+  }
+
+  async function renderNew() {
+    const grid = document.getElementById('newListingsGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Loading…</div>';
+    const res = await api('/api/properties?limit=4&sort=newest');
+    if (!res) return;
+    const data = await res.json();
+    const props = (data.properties || []).map(normalizeProperty);
+    grid.innerHTML = props.map(p => propertyCard(p)).join('');
+  }
+
+  renderFeatured();
+  renderNew();
+  updateNavForUser();
+</script>
+</body>
+</html>

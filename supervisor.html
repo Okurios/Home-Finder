@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervisor Reports — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .kpi-card {
+      background: var(--white); border-radius: var(--radius-lg); padding: 20px;
+      box-shadow: var(--card-shadow); border-left: 4px solid var(--primary);
+    }
+    .kpi-card.green  { border-left-color: var(--accent); }
+    .kpi-card.orange { border-left-color: var(--warn); }
+    .kpi-card.red    { border-left-color: var(--danger); }
+    .kpi-value { font-size: 2rem; font-weight: 900; color: var(--primary); }
+    .kpi-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .kpi-trend { font-size: 0.78rem; margin-top: 6px; font-weight: 600; }
+    .trend-up   { color: var(--accent-dk); }
+    .trend-down { color: var(--danger); }
+    .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .report-section { margin-bottom: 28px; }
+    .report-section h3 { color: var(--primary); font-size: 1rem; margin-bottom: 14px; }
+    .donut-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto; }
+    .donut-wrap svg { transform: rotate(-90deg); }
+    .donut-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--primary); }
+    .donut-label small { font-size: 0.72rem; font-weight: 500; color: var(--text-muted); }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    @media (max-width:900px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .charts-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width:500px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+      <span style="font-size:0.7rem;background:var(--warn);color:#fff;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:700;">SUPERVISOR</span>
+    </a>
+    <div class="navbar-actions" id="navActions">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Back to Site</a>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">Supervisor</div>
+    <div class="admin-nav-item active" data-sec="overview" onclick="supNav(this,'overview')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Overview</span>
+    </div>
+    <div class="admin-nav-item" data-sec="activity" onclick="supNav(this,'activity')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>User Activity</span>
+    </div>
+    <div class="admin-nav-item" data-sec="reports" onclick="supNav(this,'reports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>Reports</span>
+    </div>
+    <div class="admin-nav-item" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.12);" onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Sign Out</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- OVERVIEW -->
+    <div id="sec-overview">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <h1>Dashboard Overview</h1>
+        <div style="font-size:0.85rem;color:var(--text-muted);">Last updated: May 2026</div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value" id="statTotalListings">—</div>
+          <div class="kpi-label">Active Listings</div>
+          <div class="kpi-trend trend-up" id="statNewListingsTrend"></div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-value" id="statPendingInq">—</div>
+          <div class="kpi-label">Pending Inquiries</div>
+          <div class="kpi-trend trend-up" id="statNewInqTrend"></div>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-value" id="statPendingView">—</div>
+          <div class="kpi-label">Pending Viewings</div>
+          <div class="kpi-trend" style="color:var(--text-muted);" id="statViewingsTrend"></div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-value" id="statTotalUsers">—</div>
+          <div class="kpi-label">Registered Users</div>
+          <div class="kpi-trend trend-up" id="statNewUsersTrend"></div>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Monthly inquiries -->
+      <div class="charts-row">
+        <div class="chart-box">
+          <h4>Monthly Inquiries — 2026</h4>
+          <div class="chart-bar-wrap" id="barChart"></div>
+          <div style="display:flex;gap:0;margin-top:6px;" id="barLabels"></div>
+        </div>
+
+        <!-- Donut: property types -->
+        <div class="chart-box" style="display:flex;flex-direction:column;align-items:center;">
+          <h4 style="align-self:flex-start;">Listings by Type</h4>
+          <div class="donut-wrap">
+            <svg width="140" height="140" viewBox="0 0 140 140">
+              <!-- House: 40% -->
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#1A3C5E" stroke-width="22"
+                stroke-dasharray="135.7 203.6" stroke-dashoffset="0" />
+              <!-- Apartment: 30% -->
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#2ECC71" stroke-width="22"
+                stroke-dasharray="101.8 237.5" stroke-dashoffset="-135.7" />
+              <!-- Commercial: 15% -->
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#F39C12" stroke-width="22"
+                stroke-dasharray="50.9 288.4" stroke-dashoffset="-237.5" />
+              <!-- Land: 15% -->
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#E74C3C" stroke-width="22"
+                stroke-dasharray="50.9 288.4" stroke-dashoffset="-288.4" />
+            </svg>
+            <div class="donut-label">10<small>listings</small></div>
+          </div>
+          <div style="margin-top:16px;width:100%;">
+            <div class="legend-item"><span class="legend-dot" style="background:#1A3C5E;"></span>Houses (40%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#2ECC71;"></span>Apartments (30%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#F39C12;"></span>Commercial (15%)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#E74C3C;"></span>Land (15%)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inquiry status summary -->
+      <div class="grid-2">
+        <div class="chart-box">
+          <h4>Inquiry Status Breakdown</h4>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;">
+                <span>Pending</span><span id="iqBreakPending" style="font-weight:700;color:var(--warn);">—</span>
+              </div>
+              <div style="background:var(--border);border-radius:4px;height:8px;"><div id="iqBarPending" style="background:var(--warn);width:0%;height:100%;border-radius:4px;transition:width 0.4s;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;">
+                <span>Responded</span><span id="iqBreakResponded" style="font-weight:700;color:var(--accent-dk);">—</span>
+              </div>
+              <div style="background:var(--border);border-radius:4px;height:8px;"><div id="iqBarResponded" style="background:var(--accent);width:0%;height:100%;border-radius:4px;transition:width 0.4s;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;">
+                <span>Closed</span><span id="iqBreakClosed" style="font-weight:700;color:var(--text-muted);">—</span>
+              </div>
+              <div style="background:var(--border);border-radius:4px;height:8px;"><div id="iqBarClosed" style="background:var(--text-muted);width:0%;height:100%;border-radius:4px;transition:width 0.4s;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <h4>Viewing Request Status</h4>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;">
+                <span>Confirmed</span><span id="vwBreakConfirmed" style="font-weight:700;color:var(--accent-dk);">—</span>
+              </div>
+              <div style="background:var(--border);border-radius:4px;height:8px;"><div id="vwBarConfirmed" style="background:var(--accent);width:0%;height:100%;border-radius:4px;transition:width 0.4s;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;">
+                <span>Pending</span><span id="vwBreakPending" style="font-weight:700;color:var(--warn);">—</span>
+              </div>
+              <div style="background:var(--border);border-radius:4px;height:8px;"><div id="vwBarPending" style="background:var(--warn);width:0%;height:100%;border-radius:4px;transition:width 0.4s;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div id="sec-activity" style="display:none;">
+      <h1 style="margin-bottom:20px;">User Activity Log</h1>
+      <div class="alert alert-info" style="margin-bottom:20px;">
+        Showing activity from the last 30 days. Logs are retained for a maximum of 3 months per GDPR policy.
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th><th>IP</th></tr>
+            </thead>
+            <tbody id="activityLog"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="sec-reports" style="display:none;">
+      <h1 style="margin-bottom:20px;">Generate Reports</h1>
+
+      <div class="card card-body" style="max-width:600px;margin-bottom:24px;">
+        <h3 style="font-size:1rem;margin-bottom:16px;">Report Configuration</h3>
+        <form id="reportForm" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-group">
+            <label>Report Type</label>
+            <select class="form-control" id="reportType">
+              <option value="inquiries">Inquiry Summary</option>
+              <option value="viewings">Viewing Requests</option>
+              <option value="users">User Registrations</option>
+              <option value="listings">Listing Activity</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>From Date</label>
+              <input type="date" class="form-control" id="reportFrom" value="2026-01-01" />
+            </div>
+            <div class="form-group">
+              <label>To Date</label>
+              <input type="date" class="form-control" id="reportTo" value="2026-05-31" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Aggregation</label>
+            <select class="form-control" id="reportGroup">
+              <option value="month">By Month</option>
+              <option value="week">By Week</option>
+              <option value="day">By Day</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary">Generate Report</button>
+            <button type="button" class="btn btn-outline" onclick="exportCSV()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+            <button type="button" class="btn btn-outline" onclick="exportPDF()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Export PDF
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="reportOutput" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 id="reportTitle" style="color:var(--primary);font-size:1rem;"></h3>
+          <span id="reportRowCount" class="badge badge-primary"></span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead id="reportHead"></thead>
+              <tbody id="reportBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  requireSupervisor();
+  updateNavForUser();
+
+  function supNav(el, sec) {
+    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('[id^="sec-"]').forEach(s => s.style.display = 'none');
+    document.getElementById('sec-' + sec).style.display = 'block';
+    if (sec === 'activity') renderActivity();
+  }
+
+  // ─── Summary stats from API ───────────────────────────────────────────────────
+  async function loadSummaryStats() {
+    const res = await api('/api/reports/summary');
+    if (!res) return;
+    const d = await res.json();
+
+    // KPI cards
+    const ids = {
+      totalUsers:         'statTotalUsers',
+      totalListings:      'statTotalListings',
+      pendingInquiries:   'statPendingInq',
+      pendingViewings:    'statPendingView',
+    };
+    Object.entries(ids).forEach(([key, elId]) => {
+      const el = document.getElementById(elId);
+      if (el && d[key] !== undefined) el.textContent = d[key];
+    });
+
+    // Trend labels
+    if (d.newInquiries30d !== undefined) {
+      const t = document.getElementById('statNewInqTrend');
+      if (t) t.textContent = d.newInquiries30d > 0 ? `↑ +${d.newInquiries30d} this month` : '→ No new this month';
+    }
+    if (d.newUsers30d !== undefined) {
+      const t = document.getElementById('statNewUsersTrend');
+      if (t) t.textContent = d.newUsers30d > 0 ? `↑ +${d.newUsers30d} this month` : '→ No new this month';
+    }
+
+    // Inquiry Status Breakdown bars
+    const iqTotal = (d.pendingInquiries || 0) + (d.respondedInquiries || 0) + (d.closedInquiries || 0) || 1;
+    const setPct = (id, val, total) => {
+      const el = document.getElementById(id);
+      if (el) el.style.width = Math.round((val / total) * 100) + '%';
+    };
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? 0; };
+
+    setText('iqBreakPending',   d.pendingInquiries);
+    setText('iqBreakResponded', d.respondedInquiries);
+    setText('iqBreakClosed',    d.closedInquiries ?? 0);
+    setPct('iqBarPending',   d.pendingInquiries   || 0, iqTotal);
+    setPct('iqBarResponded', d.respondedInquiries || 0, iqTotal);
+    setPct('iqBarClosed',    d.closedInquiries    || 0, iqTotal);
+
+    // Viewing Request Status bars
+    const vwTotal = (d.pendingViewings || 0) + (d.confirmedViewings || 0) || 1;
+    setText('vwBreakConfirmed', d.confirmedViewings);
+    setText('vwBreakPending',   d.pendingViewings);
+    setPct('vwBarConfirmed', d.confirmedViewings || 0, vwTotal);
+    setPct('vwBarPending',   d.pendingViewings   || 0, vwTotal);
+
+    // Update "last updated" timestamp
+    const ts = document.querySelector('[style*="Last updated"]');
+    if (ts) ts.textContent = 'Last updated: ' + new Date().toLocaleString('en-GB', { month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ─── Bar chart — populated from API ──────────────────────────────────────────
+  let monthlyData = Array.from({length:12}, (_,i) => ({
+    month: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i], val: 0
+  }));
+
+  function renderBarChart(data) {
+    if (data) monthlyData = data;
+    const maxVal = Math.max(...monthlyData.map(d => d.val), 1);
+    const wrap = document.getElementById('barChart');
+    const labelsWrap = document.getElementById('barLabels');
+    if (!wrap) return;
+    wrap.innerHTML = monthlyData.map(d => `
+      <div class="chart-bar-col">
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;">${d.val || ''}</div>
+        <div class="chart-bar" style="height:${d.val ? (d.val/maxVal*100) : 2}px;background:${d.val ? 'var(--primary)' : 'var(--border)'};"></div>
+      </div>`).join('');
+    labelsWrap.innerHTML = monthlyData.map(d =>
+      `<div style="flex:1;text-align:center;font-size:0.7rem;color:var(--text-muted);">${d.month}</div>`).join('');
+  }
+
+  async function loadBarChart() {
+    const now = new Date();
+    const from = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+    const to   = now.toISOString().split('T')[0];
+    const res = await api(`/api/reports/inquiries?from=${from}&to=${to}&groupBy=month`);
+    if (!res) { renderBarChart(); return; }
+    const d = await res.json();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const filled = months.map((month, i) => {
+      const found = (d.rows || []).find(r => new Date(r.period || r.date || r.month).getMonth() === i);
+      return { month, val: found ? (found.total || found.count || 0) : 0 };
+    });
+    renderBarChart(filled);
+  }
+
+  // ─── Activity log from API ────────────────────────────────────────────────────
+  async function renderActivity() {
+    const tbody = document.getElementById('activityLog');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading…</td></tr>';
+    const res = await api('/api/reports/activity');
+    if (!res) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Could not load activity log.</td></tr>';
+      return;
+    }
+    const d = await res.json();
+    const logs = d.logs || [];
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No activity recorded yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(a => `
+      <tr>
+        <td style="font-size:0.82rem;white-space:nowrap;">${new Date(a.createdAt||a.ts).toLocaleString('en-GB')}</td>
+        <td style="font-size:0.85rem;">${a.user?.email || a.user || '—'}</td>
+        <td><span class="badge badge-primary" style="font-size:0.75rem;">${a.action}</span></td>
+        <td style="font-size:0.85rem;">${a.detail || '—'}</td>
+        <td style="font-size:0.82rem;color:var(--text-muted);">${a.ip || '—'}</td>
+      </tr>`).join('');
+  }
+
+  // ─── Report generation — real API ────────────────────────────────────────────
+  const REPORT_TITLES = {
+    inquiries: 'Inquiry Summary Report',
+    viewings:  'Viewing Requests Report',
+  };
+
+  let lastReportData = null;
+
+  document.getElementById('reportForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type=submit]');
+    const type = document.getElementById('reportType').value;
+    const from = document.getElementById('reportFrom').value;
+    const to   = document.getElementById('reportTo').value;
+
+    if (!from || !to) { showToast('Please select a date range.', ''); return; }
+
+    btn.disabled = true; btn.textContent = 'Generating…';
+    const res = await api(`/api/reports/${type}?from=${from}&to=${to}`);
+    btn.disabled = false; btn.textContent = 'Generate Report';
+
+    if (!res || !res.ok) {
+      const err = await res?.json().catch(() => ({}));
+      showToast(err?.error || 'Could not generate report.', '');
+      return;
+    }
+    const data = await res.json();
+    lastReportData = data;
+
+    const rows = data.rows || data.items || [];
+    const headers = data.headers || Object.keys(rows[0] || {});
+    document.getElementById('reportTitle').textContent = `${REPORT_TITLES[type] || type} · ${from} to ${to}`;
+    document.getElementById('reportRowCount').textContent = `${rows.length} row${rows.length !== 1 ? 's' : ''}`;
+    document.getElementById('reportHead').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+    document.getElementById('reportBody').innerHTML = rows.slice(0, 50).map(row =>
+      `<tr>${headers.map(h => `<td>${row[h] ?? '—'}</td>`).join('')}</tr>`).join('');
+    if (rows.length > 50) {
+      document.getElementById('reportBody').innerHTML += `<tr><td colspan="${headers.length}" style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:12px;">Showing 50 of ${rows.length} rows. Export to CSV to view all.</td></tr>`;
+    }
+
+    document.getElementById('reportOutput').style.display = 'block';
+    document.getElementById('reportOutput').scrollIntoView({ behavior: 'smooth' });
+    showToast('Report generated!', 'success');
+  });
+
+  async function exportCSV() {
+    const type = document.getElementById('reportType').value;
+    const from = document.getElementById('reportFrom').value;
+    const to   = document.getElementById('reportTo').value;
+    if (!from || !to) { showToast('Select a date range first.', ''); return; }
+    showToast('Preparing CSV…', 'success');
+    const res = await api(`/api/reports/export?type=${type}&from=${from}&to=${to}`);
+    if (!res || !res.ok) { showToast('Could not export CSV.', ''); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `homefinder-${type}-report.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('CSV downloaded!', 'success');
+  }
+
+  function exportPDF() {
+    showToast('PDF export coming in a future release. Use CSV export for now.', 'warn');
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────────
+  renderBarChart();
+  loadSummaryStats();
+  loadBarChart();
+</script>
+</body>
+</html>

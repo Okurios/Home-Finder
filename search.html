@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Properties — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .search-page-layout { display: flex; gap: 24px; align-items: flex-start; }
+    .search-sidebar {
+      width: 260px; flex-shrink: 0; background: var(--white);
+      border-radius: var(--radius-lg); box-shadow: var(--card-shadow);
+      padding: 22px; position: sticky; top: 86px;
+    }
+    .search-sidebar h3 { color: var(--primary); font-size: 1rem; margin-bottom: 18px; }
+    .search-results { flex: 1; }
+    .results-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+    .results-count { font-size: 0.9rem; color: var(--text-muted); }
+    .results-count span { font-weight: 700; color: var(--primary); }
+    .view-toggle { display: flex; gap: 4px; }
+    .view-btn {
+      width: 34px; height: 34px; border: 1.5px solid var(--border);
+      border-radius: 8px; background: var(--white); display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      transition: all var(--transition);
+    }
+    .view-btn.active { background: var(--primary); border-color: var(--primary); color: var(--white); }
+    .view-btn svg { width: 16px; height: 16px; }
+    .list-view .property-card { display: flex; flex-direction: row; }
+    .list-view .property-card-img { width: 260px; height: 180px; flex-shrink: 0; }
+    .list-view .property-card-body { padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .list-view-desc { font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .no-results {
+      text-align: center; padding: 60px 20px; color: var(--text-muted);
+    }
+    .no-results svg { width: 56px; height: 56px; margin: 0 auto 16px; opacity: 0.4; }
+    .price-range-group { display: flex; gap: 8px; align-items: center; }
+    .price-range-group input { flex: 1; }
+    .price-range-group span { color: var(--text-muted); font-size: 0.9rem; }
+    .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+    .sidebar-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .sidebar-section label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+    .checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+    </a>
+    <nav class="navbar-nav">
+      <a href="index.html">Home</a>
+      <a href="search.html" class="active">Browse</a>
+      <a href="search.html?type=buy">Buy</a>
+      <a href="search.html?type=rent">Rent</a>
+      <a href="search.html?type=commercial">Commercial</a>
+    </nav>
+    <div class="navbar-actions" id="navActions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="navbar-hamburger" onclick="toggleMobileMenu()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="background:var(--primary);padding:28px 0;">
+  <div class="container">
+    <!-- Inline search bar (Redfin-style) -->
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;background:rgba(255,255,255,0.12);border-radius:var(--radius);display:flex;align-items:center;padding:0 14px;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="searchInput" type="text" placeholder="City, neighbourhood, or postcode…"
+          style="flex:1;background:transparent;border:none;color:#fff;font-size:0.95rem;padding:10px 0;outline:none;" />
+      </div>
+      <button class="btn btn-accent" onclick="applyFilters()">Search</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div style="background:var(--white);border-bottom:1px solid var(--border);padding:12px 0;position:sticky;top:66px;z-index:50;">
+  <div class="container">
+    <div class="filter-bar" style="padding:8px 0;background:transparent;border:none;box-shadow:none;">
+      <select class="filter-select" id="filterType" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option value="house">House</option>
+        <option value="apartment">Apartment</option>
+        <option value="commercial">Commercial</option>
+        <option value="land">Land</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="">Buy &amp; Rent</option>
+        <option value="For Sale">For Sale</option>
+        <option value="For Rent">For Rent</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="filterBeds" onchange="applyFilters()">
+        <option value="">Any Beds</option>
+        <option value="1">1+ bed</option>
+        <option value="2">2+ beds</option>
+        <option value="3">3+ beds</option>
+        <option value="4">4+ beds</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="filterPrice" onchange="applyFilters()">
+        <option value="">Any Price</option>
+        <option value="500000">Under £500k</option>
+        <option value="400000">Under £400k</option>
+        <option value="300000">Under £300k</option>
+        <option value="2000">Under £2,000/mo</option>
+        <option value="1500">Under £1,500/mo</option>
+      </select>
+      <div class="filter-divider"></div>
+      <select class="filter-select" id="filterSort" onchange="applyFilters()">
+        <option value="newest">Newest First</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Clear
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="section">
+  <div class="container">
+    <div class="search-page-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="search-sidebar" style="display:none;" id="advancedSidebar">
+        <h3>Advanced Filters</h3>
+        <div class="sidebar-section">
+          <label>Property Type</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" value="house" onchange="applyFilters()" /> Houses</label>
+            <label class="checkbox-item"><input type="checkbox" value="apartment" onchange="applyFilters()" /> Apartments</label>
+            <label class="checkbox-item"><input type="checkbox" value="commercial" onchange="applyFilters()" /> Commercial</label>
+            <label class="checkbox-item"><input type="checkbox" value="land" onchange="applyFilters()" /> Land</label>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label>Price Range</label>
+          <div class="price-range-group">
+            <input type="number" class="form-control" placeholder="Min" id="priceMin" onchange="applyFilters()" style="padding:8px;" />
+            <span>–</span>
+            <input type="number" class="form-control" placeholder="Max" id="priceMax" onchange="applyFilters()" style="padding:8px;" />
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label>Bedrooms</label>
+          <div class="tags-row" style="margin-top:0;">
+            <span class="tag active" data-beds="0" onclick="setBedFilter(this,0)">Any</span>
+            <span class="tag" data-beds="1" onclick="setBedFilter(this,1)">1+</span>
+            <span class="tag" data-beds="2" onclick="setBedFilter(this,2)">2+</span>
+            <span class="tag" data-beds="3" onclick="setBedFilter(this,3)">3+</span>
+            <span class="tag" data-beds="4" onclick="setBedFilter(this,4)">4+</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <label>Features</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" onchange="applyFilters()" /> Parking</label>
+            <label class="checkbox-item"><input type="checkbox" onchange="applyFilters()" /> Garden</label>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="applyFilters()">Apply Filters</button>
+      </aside>
+
+      <!-- RESULTS -->
+      <div class="search-results">
+        <div class="results-header">
+          <div>
+            <p class="results-count"><span id="resultsCount">0</span> properties found</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="view-toggle">
+              <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid view">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+              </button>
+              <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="List view">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultsGrid" class="grid-3"></div>
+        <div id="noResults" class="no-results" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <h3>No Properties Found</h3>
+          <p style="margin-top:8px;">Try clearing your filters or searching a different location.</p>
+          <button class="btn btn-primary btn-sm" style="margin-top:16px;" onclick="clearFilters()">Clear Filters</button>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Home<span>Finder</span></div>
+        <p class="footer-desc">Your trusted partner in finding the perfect property.</p>
+      </div>
+      <div><h5>Explore</h5><div class="footer-links">
+        <a href="search.html?type=house">Houses</a>
+        <a href="search.html?type=apartment">Apartments</a>
+        <a href="search.html?type=commercial">Commercial</a>
+      </div></div>
+      <div><h5>Account</h5><div class="footer-links">
+        <a href="register.html">Register</a>
+        <a href="login.html">Sign In</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div></div>
+      <div><h5>Company</h5><div class="footer-links">
+        <a href="#">About</a><a href="#">Privacy Policy</a>
+      </div></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 HomeFinder Portal</span>
+      <span>GDPR Compliant · Secure · Trusted</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  let currentView = 'grid';
+  let currentPage = 1;
+  const PAGE_SIZE = 9;
+  let filteredData = [];
+  let selectedBedMin = 0;
+  let ALL_PROPERTIES = []; // populated from API on load
+
+  function setBedFilter(el, val) {
+    document.querySelectorAll('[data-beds]').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    selectedBedMin = val;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const type = document.getElementById('filterType')?.value || '';
+    const status = document.getElementById('filterStatus')?.value || '';
+    const beds = parseInt(document.getElementById('filterBeds')?.value || '0');
+    const priceMax = parseInt(document.getElementById('filterPrice')?.value || '0');
+    const sort = document.getElementById('filterSort')?.value || 'newest';
+
+    filteredData = ALL_PROPERTIES.filter(p => {
+      if (q && !p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q) && !p.type.includes(q)) return false;
+      if (type && p.type !== type) return false;
+      if (status && p.status !== status) return false;
+      if (beds && p.beds < beds) return false;
+      if (selectedBedMin > 0 && p.beds < selectedBedMin) return false;
+      if (priceMax && p.price > priceMax) return false;
+      return true;
+    });
+
+    if (sort === 'price_asc') filteredData.sort((a,b) => a.price - b.price);
+    else if (sort === 'price_desc') filteredData.sort((a,b) => b.price - a.price);
+    else filteredData.sort((a,b) => b.id - a.id);
+
+    currentPage = 1;
+    renderResults();
+  }
+
+  function renderResults() {
+    const grid = document.getElementById('resultsGrid');
+    const noRes = document.getElementById('noResults');
+    document.getElementById('resultsCount').textContent = filteredData.length;
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page = filteredData.slice(start, start + PAGE_SIZE);
+
+    if (page.length === 0) {
+      grid.innerHTML = '';
+      noRes.style.display = 'block';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    noRes.style.display = 'none';
+
+    if (currentView === 'list') {
+      grid.className = 'list-view';
+      grid.style.display = 'flex';
+      grid.style.flexDirection = 'column';
+      grid.style.gap = '16px';
+      grid.innerHTML = page.map(p => listCard(p)).join('');
+    } else {
+      grid.className = 'grid-3';
+      grid.style = '';
+      grid.innerHTML = page.map(p => propertyCard(p)).join('');
+    }
+
+    renderPagination();
+  }
+
+  function listCard(p) {
+    const saved = isFav(p.id);
+    return `
+    <article class="property-card" style="display:flex;flex-direction:row;" onclick="location.href='property.html?id=${p.id}'">
+      <div class="property-card-img" style="width:240px;height:auto;min-height:160px;flex-shrink:0;">
+        <img src="${p.img}" alt="${p.title}" style="height:100%;min-height:160px;" loading="lazy" />
+        <span class="property-card-badge">${p.status}</span>
+        <button class="property-card-save ${saved?'saved':''}" data-id="${p.id}" onclick="event.stopPropagation();handleSave(this,${p.id})">
+          <svg viewBox="0 0 24 24" fill="${saved?'currentColor':'none'}" stroke="currentColor" stroke-width="2" style="color:${saved?'var(--danger)':'var(--text-muted)'}">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="property-card-body" style="padding:20px;display:flex;flex-direction:column;justify-content:space-between;flex:1;">
+        <div>
+          <span class="property-type-tag">${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
+          <div class="property-price">${formatPrice(p.price, p.status)}</div>
+          <div class="property-address">${p.address}</div>
+          <p style="font-size:0.88rem;color:var(--text-muted);margin-top:6px;">${p.desc.substring(0,120)}…</p>
+        </div>
+        <div class="property-specs" style="margin-top:12px;">
+          ${p.beds > 0 ? `<span class="property-spec">${p.beds} beds</span>` : ''}
+          ${p.baths > 0 ? `<span class="property-spec">${p.baths} baths</span>` : ''}
+          <span class="property-spec">${p.sqft.toLocaleString()} ft²</span>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function renderPagination() {
+    const total = Math.ceil(filteredData.length / PAGE_SIZE);
+    const pag = document.getElementById('pagination');
+    if (total <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`;
+    for (let i = 1; i <= total; i++) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${currentPage===total?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`;
+    pag.innerHTML = html;
+  }
+
+  function goPage(n) { currentPage = n; renderResults(); window.scrollTo({top:200,behavior:'smooth'}); }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('gridViewBtn').classList.toggle('active', v === 'grid');
+    document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
+    renderResults();
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterBeds').value = '';
+    document.getElementById('filterPrice').value = '';
+    document.getElementById('filterSort').value = 'newest';
+    selectedBedMin = 0;
+    applyFilters();
+  }
+
+  // Load URL params on init
+  function initFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('q')) document.getElementById('searchInput').value = params.get('q');
+    if (params.get('type')) document.getElementById('filterType').value = params.get('type');
+    if (params.get('sort') === 'newest') document.getElementById('filterSort').value = 'newest';
+  }
+
+  initFromURL();
+  updateNavForUser();
+  // Load all properties from API, then apply client-side filters
+  (async () => {
+    const grid = document.getElementById('resultsGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted);">Loading properties…</div>';
+    const res = await api('/api/properties?limit=200');
+    if (!res) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--danger);">Could not load properties. Make sure the backend server is running.</div>';
+      return;
+    }
+    const data = await res.json();
+    ALL_PROPERTIES = (data.properties || []).map(normalizeProperty);
+    // Pre-apply filters from URL query params (Buy / Rent / Commercial nav links)
+    const urlType = getParam('type');
+    if (urlType === 'buy')        document.getElementById('filterStatus').value = 'For Sale';
+    else if (urlType === 'rent')  document.getElementById('filterStatus').value = 'For Rent';
+    else if (['commercial','house','apartment','land'].includes(urlType))
+                                  document.getElementById('filterType').value = urlType;
+    applyFilters();
+  })();
+</script>
+</body>
+</html>

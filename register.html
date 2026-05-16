@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .pwd-strength { height: 4px; border-radius: 2px; margin-top: 6px; transition: all 0.3s; }
+    .strength-weak   { background: var(--danger); width: 25%; }
+    .strength-fair   { background: var(--warn);   width: 50%; }
+    .strength-good   { background: #3498DB;       width: 75%; }
+    .strength-strong { background: var(--accent); width: 100%; }
+    .req-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); }
+    .req-item.met { color: var(--accent-dk); }
+    .req-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a href="index.html" class="navbar-brand" style="color:#fff;margin-bottom:32px;display:inline-flex;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="32" height="32" style="margin-right:10px;">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+          <path d="M9 21V12h6v9"/>
+        </svg>
+        Home<span style="color:var(--accent);">Finder</span>
+      </a>
+      <h1>Join HomeFinder Today</h1>
+      <p>Create a free account and unlock the full power of your property search.</p>
+
+      <div style="margin-top:36px;display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <span style="font-size:1.5rem;">🏠</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Save &amp; Track Properties</div>
+            <div style="opacity:0.75;font-size:0.85rem;margin-top:2px;">Build your personal favourites list and get notified of price changes.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <span style="font-size:1.5rem;">📅</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Book Viewings Instantly</div>
+            <div style="opacity:0.75;font-size:0.85rem;margin-top:2px;">Request and manage viewing appointments from your dashboard.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <span style="font-size:1.5rem;">💬</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Direct Inquiry System</div>
+            <div style="opacity:0.75;font-size:0.85rem;margin-top:2px;">Contact agents directly and track all your inquiry history.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <span style="font-size:1.5rem;">🔒</span>
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;">Secure &amp; GDPR Compliant</div>
+            <div style="opacity:0.75;font-size:0.85rem;margin-top:2px;">Your data is protected. We only collect what we need.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Register Form -->
+  <div class="auth-right">
+    <div class="auth-box">
+      <h2>Create Your Account</h2>
+      <p class="sub">Already have an account? <a href="login.html" class="auth-link">Sign in</a></p>
+
+      <div id="registerAlert"></div>
+
+      <form class="auth-form" id="registerForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" class="form-control" id="firstName" placeholder="Jane" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" class="form-control" id="lastName" placeholder="Smith" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-control" id="regEmail" placeholder="jane@example.com" required autocomplete="email" />
+          <span class="form-hint">A valid email is required — you'll verify it after registration.</span>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div style="position:relative;">
+            <input type="password" class="form-control" id="regPassword" placeholder="••••••••••••" required autocomplete="new-password" oninput="checkPwd()" />
+            <button type="button" onclick="togglePwd('regPassword')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div style="background:var(--border);border-radius:2px;margin-top:6px;height:4px;">
+            <div id="pwdStrength" class="pwd-strength strength-weak" style="width:0%;"></div>
+          </div>
+          <!-- Requirements -->
+          <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">
+            <div class="req-item" id="req-length">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+              Minimum 12 characters
+            </div>
+            <div class="req-item" id="req-upper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+              At least one uppercase letter
+            </div>
+            <div class="req-item" id="req-number">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+              At least one number
+            </div>
+            <div class="req-item" id="req-special">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+              At least one special character (!@#$%^&*)
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" class="form-control" id="regConfirm" placeholder="••••••••••••" required autocomplete="new-password" />
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-top:4px;">
+          <input type="checkbox" id="agreeTerms" style="accent-color:var(--primary);width:16px;height:16px;margin-top:2px;flex-shrink:0;" required />
+          <label for="agreeTerms" style="font-size:0.85rem;color:var(--text-muted);cursor:pointer;line-height:1.5;">
+            I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a>. I consent to the processing of my personal data in accordance with GDPR.
+          </label>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <input type="checkbox" id="marketingConsent" style="accent-color:var(--primary);width:16px;height:16px;margin-top:2px;flex-shrink:0;" />
+          <label for="marketingConsent" style="font-size:0.85rem;color:var(--text-muted);cursor:pointer;line-height:1.5;">
+            I'd like to receive property alerts and HomeFinder news by email (optional).
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Create Free Account</button>
+      </form>
+
+      <p style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-top:16px;">
+        By registering, a verification email will be sent to confirm your address.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="modal-overlay" id="successOverlay">
+  <div class="modal" style="text-align:center;max-width:420px;">
+    <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+    <h3 style="color:var(--primary);font-size:1.3rem;">Account Created!</h3>
+    <p style="color:var(--text-muted);margin-top:8px;font-size:0.92rem;">We've sent a verification email to <strong id="successEmail"></strong>. Please verify your email before signing in.</p>
+    <div class="alert alert-success" style="margin-top:16px;justify-content:center;">✓ Registration successful</div>
+    <a href="login.html" class="btn btn-primary btn-block" style="margin-top:16px;">Go to Sign In</a>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  if (isLoggedIn()) window.location.href = 'dashboard.html';
+
+  function togglePwd(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  const checkMark = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const circleMark = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>`;
+
+  function checkPwd() {
+    const pwd = document.getElementById('regPassword').value;
+    const checks = {
+      length:  pwd.length >= 12,
+      upper:   /[A-Z]/.test(pwd),
+      number:  /[0-9]/.test(pwd),
+      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
+    };
+    const metCount = Object.values(checks).filter(Boolean).length;
+
+    // Update req items
+    Object.entries(checks).forEach(([key, met]) => {
+      const el = document.getElementById(`req-${key}`);
+      if (!el) return;
+      el.className = 'req-item' + (met ? ' met' : '');
+      el.innerHTML = (met ? checkMark : circleMark) + el.innerHTML.replace(/<svg.*?<\/svg>/, '').trim();
+    });
+
+    // Strength bar
+    const bar = document.getElementById('pwdStrength');
+    const pcts = ['0%', '25%', '50%', '75%', '100%'];
+    const classes = ['', 'strength-weak', 'strength-fair', 'strength-good', 'strength-strong'];
+    bar.style.width = pcts[metCount];
+    bar.className = 'pwd-strength ' + (classes[metCount] || '');
+  }
+
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const alertEl = document.getElementById('registerAlert');
+    const btn = this.querySelector('button[type=submit]');
+
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName  = document.getElementById('lastName').value.trim();
+    const email     = document.getElementById('regEmail').value.trim().toLowerCase();
+    const pwd       = document.getElementById('regPassword').value;
+    const confirm   = document.getElementById('regConfirm').value;
+    const terms     = document.getElementById('agreeTerms').checked;
+
+    if (pwd.length < 12 || !/[A-Z]/.test(pwd) || !/[0-9]/.test(pwd) || !/[!@#$%^&*]/.test(pwd)) {
+      alertEl.innerHTML = `<div class="alert alert-error">Password does not meet the requirements above.</div>`;
+      return;
+    }
+    if (pwd !== confirm) {
+      alertEl.innerHTML = `<div class="alert alert-error">Passwords do not match.</div>`;
+      return;
+    }
+    if (!terms) {
+      alertEl.innerHTML = `<div class="alert alert-error">You must agree to the Terms of Service to continue.</div>`;
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Creating Account…';
+    alertEl.innerHTML = '';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `${firstName} ${lastName}`.trim(), email, password: pwd }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alertEl.innerHTML = `<div class="alert alert-error">${data.error || 'Registration failed. Please try again.'}</div>`;
+        return;
+      }
+      document.getElementById('successEmail').textContent = email;
+      openModal('successOverlay');
+    } catch (err) {
+      alertEl.innerHTML = `<div class="alert alert-error">Could not connect to server. Make sure the backend is running.</div>`;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Free Account';
+    }
+  });
+</script>
+</body>
+</html>

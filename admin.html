@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+      <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:700;">ADMIN</span>
+    </a>
+    <div class="navbar-actions" id="navActions">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Back to Site</a>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">Admin Panel</div>
+    <div class="admin-nav-item active" data-sec="listings" onclick="adminNav(this,'listings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      <span>Listings</span>
+    </div>
+    <div class="admin-nav-item" data-sec="inquiries" onclick="adminNav(this,'inquiries')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Inquiries</span>
+      <span id="badgeInq" style="display:none;margin-left:auto;background:#e74c3c;color:#fff;font-size:0.68rem;font-weight:800;border-radius:10px;padding:1px 7px;min-width:18px;text-align:center;"></span>
+    </div>
+    <div class="admin-nav-item" data-sec="viewings" onclick="adminNav(this,'viewings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Viewings</span>
+      <span id="badgeView" style="display:none;margin-left:auto;background:#e74c3c;color:#fff;font-size:0.68rem;font-weight:800;border-radius:10px;padding:1px 7px;min-width:18px;text-align:center;"></span>
+    </div>
+    <div class="admin-nav-item" data-sec="users" onclick="adminNav(this,'users')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Users</span>
+    </div>
+    <div class="admin-nav-item" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.12);" onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Sign Out</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- LISTINGS -->
+    <div id="sec-listings">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <h1>Property Listings</h1>
+        <button class="btn btn-accent" onclick="openModal('addListingModal')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Listing
+        </button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid-4" style="margin-bottom:24px;">
+        <div class="card card-body" style="text-align:center;">
+          <div id="statAdminTotal" style="font-size:1.8rem;font-weight:900;color:var(--primary);">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">Total Listings</div>
+        </div>
+        <div class="card card-body" style="text-align:center;">
+          <div id="statAdminForSale" style="font-size:1.8rem;font-weight:900;color:var(--accent-dk);">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">For Sale</div>
+        </div>
+        <div class="card card-body" style="text-align:center;">
+          <div id="statAdminForRent" style="font-size:1.8rem;font-weight:900;color:var(--warn);">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">For Rent</div>
+        </div>
+        <div class="card card-body" style="text-align:center;">
+          <div id="statAdminPendingInq" style="font-size:1.8rem;font-weight:900;color:var(--primary);">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">Pending Inquiries</div>
+        </div>
+      </div>
+
+      <!-- Search filter -->
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <input type="text" class="form-control" id="listingSearch" placeholder="Search by title or address…" style="max-width:300px;" oninput="filterListings()" />
+        <select class="filter-select" id="listingTypeFilter" onchange="filterListings()">
+          <option value="">All Types</option>
+          <option value="house">House</option>
+          <option value="apartment">Apartment</option>
+          <option value="commercial">Commercial</option>
+          <option value="land">Land</option>
+        </select>
+        <select class="filter-select" id="listingStatusFilter" onchange="filterListings()">
+          <option value="">All Status</option>
+          <option value="For Sale">For Sale</option>
+          <option value="For Rent">For Rent</option>
+        </select>
+      </div>
+
+      <div class="card" style="overflow:visible;">
+        <div class="table-wrap">
+          <table id="listingsTable">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listingsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INQUIRIES -->
+    <div id="sec-inquiries" style="display:none;">
+      <h1 style="margin-bottom:20px;">Manage Inquiries</h1>
+      <div id="adminInquiriesList"></div>
+    </div>
+
+    <!-- VIEWINGS -->
+    <div id="sec-viewings" style="display:none;">
+      <h1 style="margin-bottom:20px;">Manage Viewing Requests</h1>
+      <div id="adminViewingsList"></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="sec-users" style="display:none;">
+      <h1 style="margin-bottom:20px;">User Management</h1>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+        <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD/EDIT LISTING MODAL -->
+<div class="modal-overlay" id="addListingModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="modalListingTitle">Add New Listing</h3>
+      <button class="modal-close" onclick="closeModal('addListingModal')">✕</button>
+    </div>
+    <form id="listingForm" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Property Title</label>
+          <input type="text" class="form-control" id="lf-title" placeholder="e.g. Modern Family Home" required />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select class="form-control" id="lf-type" required>
+            <option value="house">House</option>
+            <option value="apartment">Apartment</option>
+            <option value="commercial">Commercial</option>
+            <option value="land">Land</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" class="form-control" id="lf-address" placeholder="Full address" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" id="lf-status">
+            <option value="For Sale">For Sale</option>
+            <option value="For Rent">For Rent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (£)</label>
+          <input type="number" class="form-control" id="lf-price" placeholder="e.g. 350000" required min="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bedrooms</label>
+          <input type="number" class="form-control" id="lf-beds" min="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Bathrooms</label>
+          <input type="number" class="form-control" id="lf-baths" min="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Floor Area (ft²)</label>
+          <input type="number" class="form-control" id="lf-sqft" min="0" value="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-control" id="lf-desc" rows="3" placeholder="Property description…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="url" class="form-control" id="lf-img" placeholder="https://…" />
+        <span class="form-hint">Paste a valid image URL (JPEG/PNG). File upload coming in next release.</span>
+      </div>
+      <div class="modal-footer" style="margin-top:0;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('addListingModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Listing</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REPLY INQUIRY MODAL -->
+<div class="modal-overlay" id="replyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Reply to Inquiry</h3>
+      <button class="modal-close" onclick="closeModal('replyModal')">✕</button>
+    </div>
+    <div id="replyContext" style="background:var(--bg);border-radius:var(--radius);padding:14px;margin-bottom:16px;font-size:0.9rem;"></div>
+    <div class="form-group">
+      <label>Your Reply <span style="color:var(--text-muted);font-weight:400;">(max 500 chars)</span></label>
+      <textarea class="form-control" id="replyText" maxlength="500" rows="4" placeholder="Type your response…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('replyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  requireAdmin();
+  updateNavForUser();
+
+  function MOCK_USERS_HTML() { return ''; } // placeholder, rendered by JS below
+
+  function adminNav(el, sec) {
+    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('[id^="sec-"]').forEach(s => s.style.display = 'none');
+    document.getElementById('sec-' + sec).style.display = 'block';
+    if (sec === 'inquiries') renderAdminInquiries();
+    if (sec === 'viewings') renderAdminViewings();
+    if (sec === 'users') renderAdminUsers();
+  }
+
+  // ===================== LISTINGS =====================
+  let adminListings = [];
+  let editingId = null;
+
+  function renderListings(data) {
+    const tbody = document.getElementById('listingsBody');
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img src="${p.img}" alt="${p.title}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;" onerror="this.src='https://placehold.co/48x36/1A3C5E/fff?text=?'" />
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;">${p.title}</div>
+              <a href="property.html?id=${p.id}" target="_blank" style="font-size:0.78rem;color:var(--primary);">View ↗</a>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-primary">${p.type}</span></td>
+        <td><span class="badge badge-${p.status==='For Sale'?'accent':'warn'}">${p.status}</span></td>
+        <td style="font-weight:700;">${formatPrice(p.price, p.status)}</td>
+        <td style="font-size:0.85rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.address}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="editListing(${p.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteListing(${p.id})">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterListings() {
+    const q = document.getElementById('listingSearch').value.toLowerCase();
+    const type = document.getElementById('listingTypeFilter').value;
+    const status = document.getElementById('listingStatusFilter').value;
+    const filtered = adminListings.filter(p => {
+      if (q && !p.title.toLowerCase().includes(q) && !p.address.toLowerCase().includes(q)) return false;
+      if (type && p.type !== type) return false;
+      if (status && p.status !== status) return false;
+      return true;
+    });
+    renderListings(filtered);
+  }
+
+  function editListing(id) {
+    const p = adminListings.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    document.getElementById('modalListingTitle').textContent = 'Edit Listing';
+    document.getElementById('lf-title').value = p.title;
+    document.getElementById('lf-type').value = p.type;
+    document.getElementById('lf-address').value = p.address;
+    document.getElementById('lf-status').value = p.status;
+    document.getElementById('lf-price').value = p.price;
+    document.getElementById('lf-beds').value = p.beds;
+    document.getElementById('lf-baths').value = p.baths;
+    document.getElementById('lf-sqft').value = p.sqft;
+    document.getElementById('lf-desc').value = p.desc;
+    document.getElementById('lf-img').value = p.img;
+    openModal('addListingModal');
+  }
+
+  async function deleteListing(id) {
+    if (!confirm('Remove this listing? (Soft delete — data is preserved for inquiry history)')) return;
+    const res = await api('/api/properties/' + id, { method: 'DELETE' });
+    if (!res || !res.ok) { showToast('Could not remove listing.', ''); return; }
+    adminListings = adminListings.filter(p => p.id !== id);
+    filterListings();
+    showToast('Listing removed successfully.', 'success');
+  }
+
+  document.getElementById('listingForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const imgUrl = document.getElementById('lf-img').value || '';
+    const payload = {
+      title:       document.getElementById('lf-title').value,
+      type:        document.getElementById('lf-type').value,
+      address:     document.getElementById('lf-address').value,
+      city:        document.getElementById('lf-address').value.split(',').pop().trim(),
+      status:      document.getElementById('lf-status').value,
+      price:       parseFloat(document.getElementById('lf-price').value),
+      beds:        parseInt(document.getElementById('lf-beds').value),
+      baths:       parseInt(document.getElementById('lf-baths').value),
+      sqft:        parseInt(document.getElementById('lf-sqft').value),
+      description: document.getElementById('lf-desc').value,
+      imageUrl:    imgUrl,
+      features:    '[]',
+      parking:     false,
+      lat:         51.5,
+      lng:         -0.1,
+    };
+    const url = editingId ? `/api/properties/${editingId}` : '/api/properties';
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await api(url, { method, body: JSON.stringify(payload) });
+    btn.disabled = false; btn.textContent = 'Save Listing';
+    if (!res || !res.ok) {
+      const d = await res?.json().catch(() => ({}));
+      showToast(d?.error || 'Could not save listing.', '');
+      return;
+    }
+    showToast(editingId ? 'Listing updated!' : 'New listing added!', 'success');
+    editingId = null;
+    document.getElementById('modalListingTitle').textContent = 'Add New Listing';
+    this.reset();
+    closeModal('addListingModal');
+    // Reload listings from API
+    const r2 = await api('/api/properties?limit=200');
+    if (r2) { const d2 = await r2.json(); adminListings = (d2.properties||[]).map(normalizeProperty); filterListings(); }
+  });
+
+  // Open add form
+  document.querySelector('[onclick="openModal(\'addListingModal\')"]')?.addEventListener('click', () => {
+    editingId = null;
+    document.getElementById('listingForm').reset();
+    document.getElementById('modalListingTitle').textContent = 'Add New Listing';
+  });
+
+  // ===================== INQUIRIES =====================
+  let adminInquiries = [];
+  let replyingId = null;
+
+  async function renderAdminInquiries() {
+    const list = document.getElementById('adminInquiriesList');
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Loading inquiries…</div>';
+    const res = await api('/api/inquiries?limit=100');
+    if (!res) { list.innerHTML = '<div class="empty-state"><h3>Could not load inquiries.</h3></div>'; return; }
+    const data = await res.json();
+    adminInquiries = data.inquiries || [];
+    if (!adminInquiries.length) {
+      list.innerHTML = '<div class="empty-state"><h3>No inquiries yet.</h3></div>';
+      return;
+    }
+    list.innerHTML = adminInquiries.map(iq => `
+      <div class="card card-body" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong><a href="property.html?id=${iq.property?.id}" style="color:var(--primary);">${iq.property?.title || 'Property'}</a></strong>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+              ${iq.user?.name || 'User'} &nbsp;·&nbsp; ${new Date(iq.createdAt).toLocaleDateString('en-GB')}
+            </div>
+          </div>
+          <span class="badge badge-${iq.status==='Responded'?'accent':iq.status==='Closed'?'':'warn'}">${iq.status}</span>
+        </div>
+        <p style="margin-top:10px;font-size:0.9rem;background:var(--bg);padding:12px;border-radius:var(--radius);">${iq.message}</p>
+        ${iq.replies?.length ? `
+          <div style="margin-top:10px;">
+            ${iq.replies.map(r => `
+              <div style="background:rgba(26,60,94,0.05);border-left:3px solid var(--primary);padding:12px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:6px;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:4px;">YOUR RESPONSE &nbsp;·&nbsp; ${r.admin?.name || 'Agent'} &nbsp;·&nbsp; ${new Date(r.createdAt).toLocaleDateString('en-GB')}</div>
+                <p style="font-size:0.9rem;margin:0;">${r.message}</p>
+              </div>`).join('')}
+          </div>` : ''}
+        ${iq.status === 'Pending' ? `
+          <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="openReply(${iq.id})">Reply to Inquiry</button>
+          <button class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="closeInquiry(${iq.id})">Mark as Closed</button>` :
+          iq.status === 'Responded' ? `
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="openReply(${iq.id})">Add Follow-up Reply</button>` : ''}
+      </div>`).join('');
+  }
+
+  function openReply(id) {
+    const iq = adminInquiries.find(x => x.id === id);
+    if (!iq) return;
+    replyingId = id;
+    document.getElementById('replyContext').innerHTML = `<strong>${iq.property?.title || 'Property'}</strong><br/><span style="color:var(--text-muted);">"${iq.message}"</span>`;
+    document.getElementById('replyText').value = '';
+    openModal('replyModal');
+  }
+
+  async function sendReply() {
+    const text = document.getElementById('replyText').value.trim();
+    if (!text) return;
+    const res = await api('/api/inquiries/' + replyingId + '/reply', {
+      method: 'POST',
+      body: JSON.stringify({ message: text }),
+    });
+    if (!res || !res.ok) { showToast('Could not send reply.', ''); return; }
+    closeModal('replyModal');
+    showToast('Reply sent! Confirmation email queued.', 'success');
+    renderAdminInquiries();
+  }
+
+  async function closeInquiry(id) {
+    const res = await api('/api/inquiries/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'Closed' }),
+    });
+    if (!res || !res.ok) { showToast('Could not close inquiry.', ''); return; }
+    showToast('Inquiry marked as closed.', '');
+    renderAdminInquiries();
+  }
+
+  // ===================== VIEWINGS =====================
+  let adminViewings = [];
+
+  async function renderAdminViewings() {
+    const list = document.getElementById('adminViewingsList');
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Loading viewings…</div>';
+    const res = await api('/api/viewings?limit=100');
+    if (!res) { list.innerHTML = '<div class="empty-state"><h3>Could not load viewings.</h3></div>'; return; }
+    const data = await res.json();
+    adminViewings = data.viewings || [];
+    if (!adminViewings.length) {
+      list.innerHTML = '<div class="empty-state"><h3>No viewing requests yet.</h3></div>';
+      return;
+    }
+    list.innerHTML = adminViewings.map(v => `
+      <div class="card card-body" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong><a href="property.html?id=${v.property?.id}" style="color:var(--primary);">${v.property?.title || 'Property'}</a></strong>
+            <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px;">
+              ${v.user?.name || 'User'} &nbsp;·&nbsp; 📅 ${v.date} &nbsp;⏰ ${v.time}
+            </div>
+          </div>
+          <span class="badge badge-${v.status==='Confirmed'?'accent':v.status==='Closed'?'':'warn'}">${v.status}</span>
+        </div>
+        <p style="margin-top:10px;font-size:0.9rem;">${v.message || ''}</p>
+        ${v.status === 'Pending' ? `
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-accent btn-sm" onclick="confirmViewing(${v.id})">✓ Confirm Viewing</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelViewing(${v.id})">Close Request</button>
+        </div>` : `<div class="alert alert-success" style="margin-top:12px;font-size:0.82rem;padding:8px 12px;">✓ ${v.status} — user has been notified.</div>`}
+      </div>`).join('');
+  }
+
+  async function confirmViewing(id) {
+    const res = await api('/api/viewings/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'Confirmed', adminNote: 'Your viewing has been confirmed.' }),
+    });
+    if (!res || !res.ok) { showToast('Could not confirm viewing.', ''); return; }
+    showToast('Viewing confirmed! Notification sent to user.', 'success');
+    renderAdminViewings();
+  }
+
+  async function cancelViewing(id) {
+    const res = await api('/api/viewings/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'Closed', adminNote: 'This viewing request has been closed.' }),
+    });
+    if (!res || !res.ok) { showToast('Could not close viewing.', ''); return; }
+    showToast('Viewing request closed.', '');
+    renderAdminViewings();
+  }
+
+  // ===================== USERS =====================
+  async function renderAdminUsers() {
+    const tbody = document.querySelector('#sec-users tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Loading users…</td></tr>';
+    const res = await api('/api/dashboard/users');
+    if (!res) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;">Could not load users.</td></tr>'; return; }
+    const data = await res.json();
+    const users = data.users || [];
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td style="font-weight:600;">${u.name || '—'}</td>
+        <td>${u.email}</td>
+        <td><span class="badge badge-${u.role==='admin'?'danger':u.role==='supervisor'?'warn':'primary'}">${u.role}</span></td>
+        <td><span class="badge badge-${u.status==='Active'?'accent':'warn'}">${u.status || 'Active'}</span></td>
+        <td style="font-size:0.85rem;">${new Date(u.createdAt).toLocaleDateString('en-GB')}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Role management coming soon.','warn')">Edit Role</button>
+          </div>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">No users found.</td></tr>';
+  }
+
+  function updateAdminStats() {
+    document.getElementById('statAdminTotal').textContent   = adminListings.length;
+    document.getElementById('statAdminForSale').textContent = adminListings.filter(p => p.status === 'For Sale').length;
+    document.getElementById('statAdminForRent').textContent = adminListings.filter(p => p.status === 'For Rent').length;
+  }
+
+  function updateSidebarBadges(pendingInq, pendingView) {
+    const bInq  = document.getElementById('badgeInq');
+    const bView = document.getElementById('badgeView');
+    if (bInq)  { bInq.textContent  = pendingInq;  bInq.style.display  = pendingInq  > 0 ? 'inline-block' : 'none'; }
+    if (bView) { bView.textContent = pendingView; bView.style.display = pendingView > 0 ? 'inline-block' : 'none'; }
+  }
+
+  // Init — load listings + summary stats from API
+  (async () => {
+    const [propRes, sumRes] = await Promise.all([
+      api('/api/properties?limit=200'),
+      api('/api/reports/summary'),
+    ]);
+    if (!propRes) { showToast('Could not load listings from server.', ''); renderListings([]); return; }
+    const data = await propRes.json();
+    adminListings = (data.properties || []).map(normalizeProperty);
+    renderListings(adminListings);
+    updateAdminStats();
+    if (sumRes) {
+      const s = await sumRes.json();
+      const el = document.getElementById('statAdminPendingInq');
+      if (el && s.pendingInquiries !== undefined) el.textContent = s.pendingInquiries;
+      updateSidebarBadges(s.pendingInquiries || 0, s.pendingViewings || 0);
+    }
+  })();
+</script>
+</body>
+</html>

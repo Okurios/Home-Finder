@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Property Details — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .property-layout { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+    .sticky-panel { position: sticky; top: 86px; }
+    .inquiry-panel {
+      background: var(--white); border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow); padding: 24px;
+    }
+    .inquiry-panel h3 { color: var(--primary); font-size: 1.05rem; margin-bottom: 16px; }
+    .panel-price { font-size: 1.8rem; font-weight: 900; color: var(--primary); margin-bottom: 4px; }
+    .panel-address { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .specs-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+      padding: 16px; background: var(--bg); border-radius: var(--radius);
+    }
+    .spec-item { display: flex; flex-direction: column; gap: 2px; }
+    .spec-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .spec-value { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .detail-section { margin-bottom: 32px; }
+    .detail-section h2 { color: var(--primary); font-size: 1.15rem; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .features-list { display: flex; flex-wrap: wrap; gap: 10px; }
+    .feature-chip {
+      background: rgba(26,60,94,0.07); color: var(--primary); padding: 6px 14px;
+      border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .feature-chip::before { content: '✓'; color: var(--accent-dk); font-weight: 700; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; flex-wrap: wrap; }
+    .breadcrumb a { color: var(--primary); }
+    .breadcrumb span { opacity: 0.5; }
+    .img-counter {
+      position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.65);
+      color: #fff; font-size: 0.82rem; font-weight: 600; padding: 4px 10px;
+      border-radius: 6px; cursor: pointer;
+    }
+    .gallery-main-wrap { position: relative; }
+    .mortgage-calc { background: var(--bg); border-radius: var(--radius); padding: 16px; margin-top: 20px; }
+    .mortgage-calc h4 { font-size: 0.9rem; color: var(--primary); margin-bottom: 12px; }
+    .calc-result { font-size: 1.2rem; font-weight: 800; color: var(--accent-dk); margin-top: 10px; }
+    .calc-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+    @media(max-width:900px) {
+      .property-layout { grid-template-columns: 1fr; }
+      .sticky-panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+    </a>
+    <nav class="navbar-nav">
+      <a href="index.html">Home</a>
+      <a href="search.html">Browse</a>
+      <a href="search.html?type=buy">Buy</a>
+      <a href="search.html?type=rent">Rent</a>
+      <a href="search.html?type=commercial">Commercial</a>
+    </nav>
+    <div class="navbar-actions" id="navActions">
+      <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="navbar-hamburger" onclick="toggleMobileMenu()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<div class="section">
+  <div class="container" id="propertyContent">
+    <div class="text-center" style="padding:60px 0;color:var(--text-muted);">Loading property…</div>
+  </div>
+</div>
+
+<!-- INQUIRY MODAL -->
+<div class="modal-overlay" id="inquiryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Submit Inquiry</h3>
+      <button class="modal-close" onclick="closeModal('inquiryModal')">✕</button>
+    </div>
+    <div id="inquiryAlert"></div>
+    <form id="inquiryForm">
+      <div class="auth-form" style="gap:14px;">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" class="form-control" id="iqName" placeholder="Full name" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" id="iqEmail" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label>Message <span style="color:var(--text-muted);font-weight:400;">(max 500 chars)</span></label>
+          <textarea class="form-control" id="iqMessage" maxlength="500" rows="4" placeholder="Ask about this property…" required></textarea>
+          <span class="form-hint"><span id="iqCount">0</span>/500 characters</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('inquiryModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Send Inquiry</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- VIEWING MODAL -->
+<div class="modal-overlay" id="viewingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Request a Viewing</h3>
+      <button class="modal-close" onclick="closeModal('viewingModal')">✕</button>
+    </div>
+    <div id="viewingAlert"></div>
+    <form id="viewingForm">
+      <div class="auth-form" style="gap:14px;">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" class="form-control" id="vwName" placeholder="Full name" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" id="vwEmail" placeholder="your@email.com" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preferred Date</label>
+            <input type="date" class="form-control" id="vwDate" required />
+          </div>
+          <div class="form-group">
+            <label>Preferred Time</label>
+            <input type="time" class="form-control" id="vwTime" value="10:00" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Message <span style="color:var(--text-muted);font-weight:400;">(max 400 chars)</span></label>
+          <textarea class="form-control" id="vwMessage" maxlength="400" rows="3" placeholder="Any special requirements?"></textarea>
+          <span class="form-hint"><span id="vwCount">0</span>/400 characters</span>
+        </div>
+      </div>
+      <div id="vwAvailNote" style="margin-bottom:10px;font-size:0.85rem;"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('viewingModal')">Cancel</button>
+        <button type="submit" class="btn btn-accent">Request Viewing</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- IMAGE LIGHTBOX -->
+<div class="modal-overlay" id="lightboxModal" style="z-index:600;">
+  <div style="position:relative;max-width:900px;width:90%;">
+    <button onclick="closeModal('lightboxModal')" style="position:absolute;top:-40px;right:0;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1.4rem;padding:4px 12px;border-radius:6px;cursor:pointer;">✕</button>
+    <img id="lightboxImg" src="" alt="Property" style="width:100%;border-radius:var(--radius-lg);max-height:80vh;object-fit:contain;" />
+    <div style="display:flex;gap:8px;margin-top:10px;justify-content:center;" id="lightboxThumbs"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  let prop = null;
+  const id = parseInt(getParam('id'));
+
+  (async () => {
+    if (!id) {
+      document.getElementById('propertyContent').innerHTML = `
+        <div class="text-center" style="padding:80px 0;">
+          <h2 style="color:var(--primary);">No Property ID</h2>
+          <a href="search.html" class="btn btn-primary" style="margin-top:20px;">Browse All Properties</a>
+        </div>`;
+      return;
+    }
+    const _r = await api('/api/properties/' + id);
+    if (!_r) {
+      document.getElementById('propertyContent').innerHTML = `<div class="text-center" style="padding:60px 0;color:var(--danger);">Could not load property — server unreachable.</div>`;
+      return;
+    }
+    const _d = await _r.json();
+    if (!_r.ok || !_d.property) {
+      document.getElementById('propertyContent').innerHTML = `
+        <div class="text-center" style="padding:80px 0;">
+          <h2 style="color:var(--primary);">Property Not Found</h2>
+          <p class="text-muted" style="margin-top:8px;">This property doesn't exist or has been removed.</p>
+          <a href="search.html" class="btn btn-primary" style="margin-top:20px;">Browse All Properties</a>
+        </div>`;
+      return;
+    }
+    prop = normalizeProperty(_d.property);
+    document.title = `${prop.title} — HomeFinder`;
+    const saved = isFav(prop.id);
+
+    const bedsRow = prop.beds > 0 ? `<div class="spec-item"><span class="spec-label">Bedrooms</span><span class="spec-value">${prop.beds}</span></div>` : '';
+    const bathRow = prop.baths > 0 ? `<div class="spec-item"><span class="spec-label">Bathrooms</span><span class="spec-value">${prop.baths}</span></div>` : '';
+    const sideImgs = prop.imgs.slice(1, 3).map(src => `
+      <div class="gallery-side-img" onclick="openLightbox(0)">
+        <img src="${src}" alt="${prop.title}" loading="lazy" style="cursor:pointer;" />
+      </div>`).join('');
+
+    document.getElementById('propertyContent').innerHTML = `
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span>
+      <a href="search.html">Browse</a>
+      <span>›</span>
+      <a href="search.html?type=${prop.type}">${prop.type.charAt(0).toUpperCase()+prop.type.slice(1)}</a>
+      <span>›</span>
+      <span style="color:var(--text);">${prop.title}</span>
+    </nav>
+
+    <!-- GALLERY -->
+    <div class="gallery-grid two-col" style="margin-bottom:28px;">
+      <div class="gallery-main gallery-main-wrap" onclick="openLightbox(0)" style="cursor:pointer;">
+        <img src="${prop.imgs[0]}" alt="${prop.title}" onerror="this.src='https://placehold.co/800x500/1A3C5E/fff?text=No+Image'" />
+        <div class="img-counter">📷 ${prop.imgs.length} photos</div>
+      </div>
+      <div class="gallery-side">${sideImgs}</div>
+    </div>
+
+    <div class="property-layout">
+      <!-- LEFT: Detail Content -->
+      <div>
+        <!-- Title bar -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <span class="property-type-tag" style="font-size:0.88rem;">${prop.type.charAt(0).toUpperCase()+prop.type.slice(1)}</span>
+            <h1 style="font-size:1.75rem;color:var(--primary);margin-top:4px;">${prop.title}</h1>
+            <p style="color:var(--text-muted);margin-top:4px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              ${prop.address}
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button id="saveBtn" onclick="togglePropertySave()" class="btn btn-outline btn-sm" style="gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${saved?'var(--danger)':'none'}" stroke="${saved?'var(--danger)':'currentColor'}" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+              </svg>
+              ${saved ? 'Saved' : 'Save'}
+            </button>
+            <a href="search.html" class="btn btn-ghost btn-sm">‹ Back</a>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section" style="margin-top:24px;">
+          <h2>About This Property</h2>
+          <p style="color:var(--text);line-height:1.8;font-size:0.95rem;">${prop.desc}</p>
+        </div>
+
+        <!-- Key Features -->
+        <div class="detail-section">
+          <h2>Key Features</h2>
+          <div class="features-list">
+            ${prop.features.map(f => `<span class="feature-chip">${f}</span>`).join('')}
+          </div>
+        </div>
+
+        <!-- Property Details -->
+        <div class="detail-section">
+          <h2>Property Details</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;">
+            <div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+              <span class="spec-label">Status</span>
+              <span class="spec-value">${prop.status}</span>
+            </div>
+            <div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+              <span class="spec-label">Type</span>
+              <span class="spec-value">${prop.type.charAt(0).toUpperCase()+prop.type.slice(1)}</span>
+            </div>
+            ${prop.beds > 0 ? `<div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;"><span class="spec-label">Bedrooms</span><span class="spec-value">${prop.beds}</span></div>` : ''}
+            ${prop.baths > 0 ? `<div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;"><span class="spec-label">Bathrooms</span><span class="spec-value">${prop.baths}</span></div>` : ''}
+            <div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+              <span class="spec-label">Floor Area</span>
+              <span class="spec-value">${prop.sqft.toLocaleString()} ft²</span>
+            </div>
+            <div class="spec-item" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;">
+              <span class="spec-label">Parking</span>
+              <span class="spec-value">${prop.parking ? 'Yes' : 'No'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map placeholder -->
+        <div class="detail-section">
+          <h2>Location</h2>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);">
+            <iframe
+              src="https://www.openstreetmap.org/export/embed.html?bbox=${prop.lng-0.05}%2C${prop.lat-0.03}%2C${prop.lng+0.05}%2C${prop.lat+0.03}&layer=mapnik&marker=${prop.lat}%2C${prop.lng}"
+              width="100%" height="300" frameborder="0" scrolling="no" loading="lazy"
+              style="display:block;filter:brightness(0.95);"
+            ></iframe>
+          </div>
+          <p style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">Approximate location shown. Exact address provided after inquiry.</p>
+        </div>
+
+        <!-- Similar properties -->
+        <div class="detail-section">
+          <h2>Similar Properties</h2>
+          <div class="grid-3" id="similarGrid"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sticky inquiry panel -->
+      <div class="sticky-panel">
+        <div class="inquiry-panel">
+          <div class="panel-price">${formatPrice(prop.price, prop.status)}</div>
+          <div class="panel-address">${prop.address}</div>
+          <div class="specs-grid">
+            ${prop.beds > 0 ? `<div class="spec-item"><span class="spec-label">Beds</span><span class="spec-value">${prop.beds}</span></div>` : ''}
+            ${prop.baths > 0 ? `<div class="spec-item"><span class="spec-label">Baths</span><span class="spec-value">${prop.baths}</span></div>` : ''}
+            <div class="spec-item"><span class="spec-label">Size</span><span class="spec-value">${prop.sqft.toLocaleString()} ft²</span></div>
+            <div class="spec-item"><span class="spec-label">Type</span><span class="spec-value">${prop.type.charAt(0).toUpperCase()+prop.type.slice(1)}</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button class="btn btn-primary btn-block" onclick="openInquiry()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Send Inquiry
+            </button>
+            <button class="btn btn-accent btn-block" onclick="openViewing()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Book Viewing
+            </button>
+          </div>
+          <div class="alert alert-info" style="margin-top:16px;font-size:0.82rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+            Confirmation email sent within 30 seconds of inquiry.
+          </div>
+
+          ${prop.status === 'For Sale' ? `
+          <!-- Mortgage Calculator -->
+          <div class="mortgage-calc">
+            <h4>💰 Mortgage Calculator</h4>
+            <div class="form-group">
+              <label style="font-size:0.82rem;">Deposit (%)</label>
+              <input type="range" id="depositRange" min="5" max="40" value="20" oninput="calcMortgage()" style="width:100%;accent-color:var(--primary);" />
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);"><span>5%</span><span id="depositPct">20%</span><span>40%</span></div>
+            </div>
+            <div class="form-group" style="margin-top:8px;">
+              <label style="font-size:0.82rem;">Term (years)</label>
+              <select class="form-control" id="termYears" onchange="calcMortgage()" style="padding:7px 10px;font-size:0.85rem;">
+                <option value="25">25 years</option>
+                <option value="20">20 years</option>
+                <option value="30">30 years</option>
+                <option value="15">15 years</option>
+              </select>
+            </div>
+            <div class="calc-result" id="calcResult">~£2,100/mo</div>
+            <div class="calc-note" id="calcNote">Estimated at 4.5% APR, 20% deposit</div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+
+    // Render similar properties from API
+    api('/api/properties?limit=4').then(async r => {
+      if (!r) return;
+      const d = await r.json();
+      const similar = (d.properties || []).map(normalizeProperty).filter(p => p.type === prop.type && p.id !== prop.id).slice(0, 3);
+      document.getElementById('similarGrid').innerHTML = similar.map(p => propertyCard(p)).join('');
+    });
+
+    // Mortgage calculator
+    function calcMortgage() {
+      const deposit = parseInt(document.getElementById('depositRange')?.value || 20);
+      const term = parseInt(document.getElementById('termYears')?.value || 25);
+      document.getElementById('depositPct').textContent = deposit + '%';
+      const loan = prop.price * (1 - deposit / 100);
+      const rate = 0.045 / 12;
+      const n = term * 12;
+      const monthly = loan * rate * Math.pow(1 + rate, n) / (Math.pow(1 + rate, n) - 1);
+      document.getElementById('calcResult').textContent = `~£${Math.round(monthly).toLocaleString()}/mo`;
+      document.getElementById('calcNote').textContent = `Estimated at 4.5% APR, ${deposit}% deposit, ${term}yr term`;
+    }
+    if (prop.status === 'For Sale') calcMortgage();
+  })();
+
+  // ---- Inquiry / Viewing openers ----
+  function openInquiry() {
+    const user = getUser();
+    if (user) {
+      document.getElementById('iqName').value = user.name || '';
+      document.getElementById('iqEmail').value = user.email || '';
+    }
+    openModal('inquiryModal');
+  }
+  // Availability state
+  let bookedDates = [];
+  let bookedByDate = {};
+
+  async function openViewing() {
+    const user = getUser();
+    if (user) {
+      document.getElementById('vwName').value = user.name || '';
+      document.getElementById('vwEmail').value = user.email || '';
+    }
+    // Set min date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateInput = document.getElementById('vwDate');
+    dateInput.min = tomorrow.toISOString().split('T')[0];
+    dateInput.value = '';
+
+    // Reset note
+    const note = document.getElementById('vwAvailNote');
+    if (note) note.innerHTML = '';
+
+    openModal('viewingModal');
+
+    // Fetch booked dates (public endpoint — no auth needed)
+    if (prop && prop.id) {
+      try {
+        const r = await fetch(API_BASE + '/api/viewings/availability?propertyId=' + prop.id);
+        const d = await r.json();
+        bookedDates = d.bookedDates || [];
+        bookedByDate = d.byDate || {};
+        if (note && bookedDates.length) {
+          note.innerHTML = '<div style="padding:10px 14px;background:#fff8e1;border-left:3px solid #f59e0b;border-radius:0 var(--radius) var(--radius) 0;font-size:0.85rem;color:#92400e;">' +
+            '⚠ <strong>' + bookedDates.length + ' date' + (bookedDates.length > 1 ? 's' : '') + ' already have pending/confirmed viewings:</strong> ' +
+            bookedDates.join(', ') +
+            '<br><span style="font-size:0.8rem;">You may still request these dates — the agent will confirm availability.</span></div>';
+        }
+      } catch (_) {}
+    }
+  }
+
+  // Warn on date selection if the date is already booked
+  document.getElementById('vwDate')?.addEventListener('change', function() {
+    const note = document.getElementById('vwAvailNote');
+    if (!note) return;
+    const selected = this.value;
+    if (bookedDates.includes(selected)) {
+      const times = bookedByDate[selected] || [];
+      note.innerHTML = '<div style="padding:10px 14px;background:#fff8e1;border-left:3px solid #f59e0b;border-radius:0 var(--radius) var(--radius) 0;font-size:0.85rem;color:#92400e;">' +
+        '⚠ <strong>' + selected + '</strong> already has a viewing request' +
+        (times.length ? ' at: ' + times.join(', ') : '') + '. You can still submit — the agent will confirm availability.' +
+        '</div>';
+    } else if (bookedDates.length) {
+      note.innerHTML = '<div style="padding:8px 14px;background:#f0fdf4;border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;font-size:0.85rem;color:var(--accent-dk);">✓ This date looks available!</div>';
+      setTimeout(() => { note.innerHTML = ''; }, 3000);
+    }
+  });
+
+  function togglePropertySave() {
+    const isSaved = toggleFav(prop.id);
+    const btn = document.getElementById('saveBtn');
+    const svg = btn.querySelector('svg');
+    if (isSaved) {
+      svg.setAttribute('fill', 'var(--danger)');
+      svg.setAttribute('stroke', 'var(--danger)');
+      btn.innerHTML = btn.innerHTML.replace('Save', 'Saved');
+    } else {
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      btn.innerHTML = btn.innerHTML.replace('Saved', 'Save');
+    }
+  }
+
+  // Character counters
+  document.getElementById('iqMessage')?.addEventListener('input', function() {
+    document.getElementById('iqCount').textContent = this.value.length;
+  });
+  document.getElementById('vwMessage')?.addEventListener('input', function() {
+    document.getElementById('vwCount').textContent = this.value.length;
+  });
+
+  // Inquiry form submit — calls real API
+  document.getElementById('inquiryForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!isLoggedIn()) { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href); return; }
+    const alertEl = document.getElementById('inquiryAlert');
+    const btn = this.querySelector('button[type=submit]');
+    const message = document.getElementById('iqMessage').value.trim();
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const res = await api('/api/inquiries', { method: 'POST', body: JSON.stringify({ propertyId: prop.id, message }) });
+    btn.disabled = false; btn.textContent = 'Send Inquiry';
+    if (!res) { alertEl.innerHTML = `<div class="alert alert-error">Could not connect to server.</div>`; return; }
+    const data = await res.json();
+    if (!res.ok) { alertEl.innerHTML = `<div class="alert alert-error">${data.error || 'Failed to send inquiry.'}</div>`; return; }
+    alertEl.innerHTML = `<div class="alert alert-success">✓ Inquiry submitted! You'll receive a confirmation email shortly.</div>`;
+    showToast('Inquiry sent successfully!', 'success');
+    setTimeout(() => { closeModal('inquiryModal'); alertEl.innerHTML = ''; this.reset(); }, 3000);
+  });
+
+  // Viewing form submit — calls real API
+  document.getElementById('viewingForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!isLoggedIn()) { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href); return; }
+    const alertEl = document.getElementById('viewingAlert');
+    const btn = this.querySelector('button[type=submit]');
+    const message = document.getElementById('vwMessage').value.trim();
+    const date = document.getElementById('vwDate').value;
+    const time = document.getElementById('vwTime').value;
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    const res = await api('/api/viewings', { method: 'POST', body: JSON.stringify({ propertyId: prop.id, date, time, message }) });
+    btn.disabled = false; btn.textContent = 'Request Viewing';
+    if (!res) { alertEl.innerHTML = `<div class="alert alert-error">Could not connect to server.</div>`; return; }
+    const data = await res.json();
+    if (!res.ok) { alertEl.innerHTML = `<div class="alert alert-error">${data.error || 'Failed to submit request.'}</div>`; return; }
+    alertEl.innerHTML = `<div class="alert alert-success">✓ Viewing request submitted! Our team will confirm your appointment shortly.</div>`;
+    showToast('Viewing request sent!', 'success');
+    setTimeout(() => { closeModal('viewingModal'); alertEl.innerHTML = ''; this.reset(); }, 3000);
+  });
+
+  // Lightbox
+  let currentImg = 0;
+  function openLightbox(idx) {
+    if (!prop) return;
+    currentImg = idx;
+    document.getElementById('lightboxImg').src = prop.imgs[idx];
+    const thumbs = prop.imgs.map((src, i) => `
+      <img src="${src}" onclick="changeLightboxImg(${i})" style="width:70px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid ${i===idx?'var(--accent)':'transparent'};opacity:${i===idx?1:0.6};" />`).join('');
+    document.getElementById('lightboxThumbs').innerHTML = thumbs;
+    openModal('lightboxModal');
+  }
+  function changeLightboxImg(idx) {
+    currentImg = idx;
+    openLightbox(idx);
+  }
+
+  updateNavForUser();
+</script>
+</body>
+</html>
