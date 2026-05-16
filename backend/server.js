@@ -9,17 +9,27 @@ const { apiLimiter } = require('./middleware/rateLimit');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust Render's load balancer so express-rate-limit can read the real client IP
+app.set('trust proxy', 1);
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
   origin: function(origin, callback) {
+    // No origin = same-origin request or server-to-server — always allow
+    if (!origin) return callback(null, true);
     const allowed = [
       'http://localhost:3000', 'http://127.0.0.1:3000',
       'http://localhost:5500', 'http://127.0.0.1:5500',
       'null',
       process.env.FRONTEND_URL,
     ].filter(Boolean);
-    if (!origin || allowed.includes(origin)) callback(null, true);
-    else callback(new Error('Not allowed by CORS'));
+    if (allowed.includes(origin)) return callback(null, true);
+    // In production single-service mode the frontend and API share the same
+    // Render URL, so allow any *.onrender.com origin automatically
+    if (process.env.NODE_ENV === 'production' && /\.onrender\.com$/.test(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
 }));
