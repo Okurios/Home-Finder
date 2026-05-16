@@ -14,6 +14,10 @@ async function getTransporter() {
     _transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
+      // Short timeouts so SMTP failure is fast (Render blocks outbound SMTP)
+      connectionTimeout: 5000,
+      socketTimeout: 5000,
+      greetingTimeout: 5000,
       auth: { user: account.user, pass: account.pass },
     });
     console.log(`[Email] Ethereal account: ${account.user}`);
@@ -21,6 +25,10 @@ async function getTransporter() {
     _transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
+      // Short timeouts to fail fast if SMTP is unavailable
+      connectionTimeout: 5000,
+      socketTimeout: 10000,
+      greetingTimeout: 5000,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
   }
