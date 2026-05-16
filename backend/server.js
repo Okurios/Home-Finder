@@ -42,7 +42,14 @@ app.use('/api', apiLimiter);
 // Serve uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Serve the frontend HTML files directly from the parent folder
-app.use(express.static(path.join(__dirname, '..')));
+// HTML files must never be cached so CDN always serves the latest version
+app.use(express.static(path.join(__dirname, '..'), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+  },
+}));
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/auth',       require('./routes/auth'));
