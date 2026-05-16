@@ -231,12 +231,13 @@
       pendingUserId = data.userId;
       document.getElementById('emailDisplay').textContent = email;
 
-      // Dev mode banner — auto-fills the OTP boxes too
+      // Show OTP banner if code is included in response (email failed or dev mode)
+      const otpCode = data._otpCode || data._devOtp;
       const devBanner = document.getElementById('devOtpBanner');
-      if (data._devOtp && devBanner) {
+      if (otpCode && devBanner) {
         devBanner.style.display = 'block';
-        devBanner.innerHTML = '🔧 <strong>Dev mode</strong> \u2014 Your code is: <span style="font-size:1.3rem;letter-spacing:4px;font-weight:900;color:var(--primary);">' + data._devOtp + '</span>';
-        var otpStr = String(data._devOtp);
+        devBanner.innerHTML = '🔑 <strong>Your verification code</strong> \u2014 <span style="font-size:1.3rem;letter-spacing:4px;font-weight:900;color:var(--primary);">' + otpCode + '</span>';
+        var otpStr = String(otpCode);
         document.querySelectorAll('.otp-input').forEach(function(box, i) {
           box.value = otpStr[i] || '';
         });
