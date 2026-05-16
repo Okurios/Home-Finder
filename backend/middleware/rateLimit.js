@@ -8,6 +8,8 @@ const loginLimiter = rateLimit({
   skipSuccessfulRequests: true,  // only count failed (non-2xx) attempts
   standardHeaders: true,
   legacyHeaders: false,
+  // trust proxy is set in server.js; suppress the X-Forwarded-For validation warning
+  validate: { xForwardedForHeader: false },
   message: { error: 'Too many failed login attempts. Please try again in 15 minutes.' },
   handler(req, res, next, options) {
     res.status(429).json(options.message);
@@ -20,6 +22,8 @@ const apiLimiter = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  // trust proxy is set in server.js; suppress the X-Forwarded-For validation warning
+  validate: { xForwardedForHeader: false },
   message: { error: 'Too many requests. Please slow down.' },
 });
 

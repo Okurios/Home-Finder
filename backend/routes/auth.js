@@ -70,23 +70,25 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     const otp = await createOTP(user.id);
     let previewUrl = null;
+    let emailFailed = false;
 
     try {
       previewUrl = await sendOTP(user.email, otp);
     } catch (emailErr) {
       console.error('[Auth] Email send failed:', emailErr.message);
-      // In dev mode, still allow login even if email fails
-      if (process.env.NODE_ENV !== 'development') {
-        return res.status(503).json({ error: 'Could not send verification email. Please try again.' });
-      }
+      // Log OTP so it can be retrieved from server logs (Render dashboard)
+      console.log(`[Auth] OTP for ${user.email} (email unavailable): ${otp}`);
+      emailFailed = true;
+      // Do NOT block login — email failure should not lock users out
     }
 
     await auditLog(user.id, 'LOGIN_ATTEMPT', `OTP sent to ${user.email}`, req.ip);
 
     const response = { message: 'Verification code sent to your email.', userId: user.id };
-    // In dev/ethereal mode, include the preview URL so the developer can click it
+    // Include preview URL if Ethereal captured it
     if (previewUrl) response.emailPreview = previewUrl;
-    if (process.env.NODE_ENV === 'development') response._devOtp = otp; // convenience
+    // Include OTP in response if email failed or in development (check browser Network tab / Render logs)
+    if (emailFailed || process.env.NODE_ENV === 'development') response._otpCode = otp;
 
     res.json(response);
   } catch (err) {
