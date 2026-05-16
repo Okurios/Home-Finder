@@ -106,8 +106,6 @@
         <h2>Two-Factor Auth</h2>
         <p class="sub">We've sent a 6-digit code to <strong id="emailDisplay"></strong></p>
         <div id="otpAlert"></div>
-        <!-- Dev mode OTP banner — hidden in production -->
-        <div id="devOtpBanner" style="display:none;margin:12px 0;padding:12px 16px;background:#fffbeb;border:1px solid #f59e0b;border-radius:var(--radius);font-size:0.9rem;color:#92400e;text-align:center;"></div>
         <form class="auth-form" id="otpForm" style="margin-top:24px;">
           <div class="form-group" style="align-items:center;">
             <label style="margin-bottom:12px;">Enter your 6-digit verification code</label>
@@ -231,23 +229,11 @@
       pendingUserId = data.userId;
       document.getElementById('emailDisplay').textContent = email;
 
-      // Show OTP banner if code is included in response (email failed or dev mode)
-      const otpCode = data._otpCode || data._devOtp;
-      const devBanner = document.getElementById('devOtpBanner');
-      if (otpCode && devBanner) {
-        devBanner.style.display = 'block';
-        devBanner.innerHTML = '🔑 <strong>Your verification code</strong> \u2014 <span style="font-size:1.3rem;letter-spacing:4px;font-weight:900;color:var(--primary);">' + otpCode + '</span>';
-        var otpStr = String(otpCode);
-        document.querySelectorAll('.otp-input').forEach(function(box, i) {
-          box.value = otpStr[i] || '';
-        });
-      }
-
       document.getElementById('step1').style.display = 'none';
       document.getElementById('step2').style.display = 'block';
       document.querySelectorAll('.otp-input')[0].focus();
       startOTPTimer();
-      showToast('Code sent! See the yellow banner below.', 'success');
+      showToast('Check your Render logs for the verification code.', 'info');
     } catch (err) {
       alertEl.innerHTML = '<div class="alert alert-error">Could not connect to server. Make sure the backend is running.</div>';
     } finally {
