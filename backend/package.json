@@ -6,10 +6,19 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "test": "jest --testPathPattern=tests/ --forceExit --detectOpenHandles",
+    "test:unit": "jest --testPathPattern=tests/unit --forceExit",
+    "test:integration": "jest --testPathPattern=tests/integration --forceExit --detectOpenHandles",
     "db:migrate": "npx prisma migrate dev --name init",
     "db:seed": "node prisma/seed.js",
     "db:reset": "npx prisma migrate reset --force && node prisma/seed.js",
     "db:studio": "npx prisma studio"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "verbose": true,
+    "testTimeout": 10000
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -31,6 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^7.0.3",
+    "resend": "^4.0.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
