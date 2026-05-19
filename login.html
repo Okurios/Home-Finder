@@ -106,6 +106,10 @@
         <h2>Two-Factor Auth</h2>
         <p class="sub">We've sent a 6-digit code to <strong id="emailDisplay"></strong></p>
         <div id="otpAlert"></div>
+        <!-- Shown when email delivery is unavailable — code delivered inline instead -->
+        <div id="otpFallbackBanner" style="display:none;margin:12px 0;padding:12px 16px;background:#f0f9ff;border:1px solid #0ea5e9;border-radius:var(--radius);font-size:0.9rem;color:#0369a1;text-align:center;">
+          📬 Code delivered here (email unavailable) — <span id="otpFallbackCode" style="font-size:1.2rem;letter-spacing:4px;font-weight:900;color:#0c4a6e;"></span>
+        </div>
         <form class="auth-form" id="otpForm" style="margin-top:24px;">
           <div class="form-group" style="align-items:center;">
             <label style="margin-bottom:12px;">Enter your 6-digit verification code</label>
@@ -229,11 +233,21 @@
       pendingUserId = data.userId;
       document.getElementById('emailDisplay').textContent = email;
 
+      // Show inline code if email could not be delivered
+      if (data._otpCode) {
+        const banner = document.getElementById('otpFallbackBanner');
+        document.getElementById('otpFallbackCode').textContent = data._otpCode;
+        if (banner) banner.style.display = 'block';
+        var otpStr = String(data._otpCode);
+        document.querySelectorAll('.otp-input').forEach(function(box, i) {
+          box.value = otpStr[i] || '';
+        });
+      }
+
       document.getElementById('step1').style.display = 'none';
       document.getElementById('step2').style.display = 'block';
       document.querySelectorAll('.otp-input')[0].focus();
       startOTPTimer();
-      showToast('Check your Render logs for the verification code.', 'info');
     } catch (err) {
       alertEl.innerHTML = '<div class="alert alert-error">Could not connect to server. Make sure the backend is running.</div>';
     } finally {
