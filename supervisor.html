@@ -206,7 +206,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th><th>IP</th></tr>
+              <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr>
             </thead>
             <tbody id="activityLog"></tbody>
           </table>
@@ -390,16 +390,16 @@
   async function renderActivity() {
     const tbody = document.getElementById('activityLog');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Loading…</td></tr>';
     const res = await api('/api/reports/activity');
     if (!res) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Could not load activity log.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Could not load activity log.</td></tr>';
       return;
     }
     const d = await res.json();
     const logs = d.logs || [];
     if (!logs.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No activity recorded yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">No activity recorded yet.</td></tr>';
       return;
     }
     tbody.innerHTML = logs.map(a => `
@@ -408,7 +408,6 @@
         <td style="font-size:0.85rem;">${a.user?.email || a.user || '—'}</td>
         <td><span class="badge badge-primary" style="font-size:0.75rem;">${a.action}</span></td>
         <td style="font-size:0.85rem;">${a.detail || '—'}</td>
-        <td style="font-size:0.82rem;color:var(--text-muted);">${a.ip || '—'}</td>
       </tr>`).join('');
   }
 

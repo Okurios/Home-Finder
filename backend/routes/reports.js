@@ -246,7 +246,7 @@ router.get('/export', requireSupervisor, async (req, res) => {
         Email: l.user?.email || '',
         Action: l.action,
         Detail: l.detail,
-        IP: l.ip,
+        // IP intentionally excluded — GDPR data minimisation (supervisors do not need IP data)
       }));
       filename = `audit_${start.toISOString().slice(0,10)}_${end.toISOString().slice(0,10)}.csv`;
     } else {

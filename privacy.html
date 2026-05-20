@@ -116,7 +116,8 @@
     <li>Two-factor authentication via email OTP on every login.</li>
     <li>Single-session enforcement — signing in on a new device invalidates previous sessions.</li>
     <li>Rate limiting on login and OTP endpoints to prevent brute-force attacks.</li>
-    <li>IP addresses anonymised before storage (last octet masked).</li>
+    <li>IP addresses anonymised before storage (last octet masked, e.g. <code>1.2.3.xxx</code>).</li>
+    <li>IP data is visible only to <strong>Admins</strong> for security oversight. Supervisors do not have access to IP data (GDPR data minimisation, Art. 5(1)(c)).</li>
   </ul>
 
   <!-- ── 8. Cookies ───────────────────────────────────────────────────────── -->
