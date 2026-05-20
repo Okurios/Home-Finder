@@ -141,7 +141,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // ─── POST /api/properties ────────────────────────────────────────────────────
 router.post('/', requireAdmin, async (req, res) => {
   try {
-    const { title, type, status, price, address, city, beds, baths, sqft, parking, description, features, lat, lng, featured, imageUrl } = req.body;
+    const { title, type, status, price, address, city, beds, baths, sqft, parking, description, features, lat, lng, featured, imageUrl, imageUrls } = req.body;
     if (!title || !type || !status || !price || !address) {
       return res.status(400).json({ error: 'Title, type, status, price, and address are required.' });
     }
@@ -164,11 +164,14 @@ router.post('/', requireAdmin, async (req, res) => {
         createdById: req.user.id,
       },
     });
-    // If the admin provided an image URL, save it as the first PropertyImage
-    if (imageUrl) {
-      await prisma.propertyImage.create({
-        data: { propertyId: property.id, url: imageUrl, order: 0 },
-      });
+    // Save image URLs (base64 or external) — imageUrls array takes priority over single imageUrl
+    const urlsToSave = Array.isArray(imageUrls) && imageUrls.length > 0
+      ? imageUrls
+      : (imageUrl ? [imageUrl] : []);
+    if (urlsToSave.length > 0) {
+      await Promise.all(urlsToSave.map((url, idx) =>
+        prisma.propertyImage.create({ data: { propertyId: property.id, url, order: idx } })
+      ));
     }
     await auditLog(req.user.id, 'PROPERTY_CREATE', `Created property ID ${property.id}: ${title}`, req.ip);
     res.status(201).json({ property: parseProperty(property) });
@@ -186,7 +189,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Property not found.' });
 
     const { title, type, status, price, address, city, beds, baths, sqft, parking, description, features, lat, lng, featured } = req.body;
-    const { imageUrl: imgUrl } = req.body;
+    const { imageUrl: imgUrl, imageUrls: imgUrls } = req.body;
     const property = await prisma.property.update({
       where: { id },
       data: {
@@ -208,14 +211,15 @@ router.put('/:id', requireAdmin, async (req, res) => {
         updatedById: req.user.id,
       },
     });
-    // If a new image URL was provided, replace the first image (order 0)
-    if (imgUrl) {
-      const first = await prisma.propertyImage.findFirst({ where: { propertyId: id, order: 0 } });
-      if (first) {
-        await prisma.propertyImage.update({ where: { id: first.id }, data: { url: imgUrl } });
-      } else {
-        await prisma.propertyImage.create({ data: { propertyId: id, url: imgUrl, order: 0 } });
-      }
+    // Add new images (base64 or external URLs) to the property
+    const newUrls = Array.isArray(imgUrls) && imgUrls.length > 0
+      ? imgUrls
+      : (imgUrl ? [imgUrl] : []);
+    if (newUrls.length > 0) {
+      const existingCount = await prisma.propertyImage.count({ where: { propertyId: id } });
+      await Promise.all(newUrls.map((url, idx) =>
+        prisma.propertyImage.create({ data: { propertyId: id, url, order: existingCount + idx } })
+      ));
     }
     await auditLog(req.user.id, 'PROPERTY_UPDATE', `Updated property ID ${id}`, req.ip);
     res.json({ property: parseProperty(property) });
