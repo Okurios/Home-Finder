@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — HomeFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .privacy-body { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+    .privacy-body h1 { font-size: 2rem; color: var(--primary); margin-bottom: 8px; }
+    .privacy-body .meta { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 36px; }
+    .privacy-body h2 { font-size: 1.15rem; color: var(--primary); margin: 32px 0 10px; }
+    .privacy-body p, .privacy-body li { color: var(--text); line-height: 1.8; font-size: 0.95rem; }
+    .privacy-body ul { padding-left: 20px; margin: 8px 0; }
+    .privacy-body li { margin-bottom: 4px; }
+    .privacy-body table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+    .privacy-body th { background: var(--primary); color: #fff; text-align: left; padding: 10px 14px; }
+    .privacy-body td { border: 1px solid var(--border); padding: 9px 14px; vertical-align: top; }
+    .privacy-body tr:nth-child(even) td { background: var(--bg); }
+    .badge-gdpr { display: inline-flex; align-items: center; gap: 6px; background: rgba(26,60,94,0.07); border: 1px solid var(--border); border-radius: 20px; padding: 4px 14px; font-size: 0.82rem; font-weight: 600; color: var(--primary); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+      Home<span class="accent">Finder</span>
+    </a>
+    <div class="navbar-actions" id="navActions">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Back to Site</a>
+    </div>
+  </div>
+</nav>
+
+<div class="privacy-body">
+
+  <div class="badge-gdpr">🔒 GDPR Compliant</div>
+  <h1>Privacy Policy &amp; Terms of Service</h1>
+  <p class="meta">Last updated: May 2026 &nbsp;·&nbsp; Applies to HomeFinder Portal</p>
+
+  <!-- ── 1. Who We Are ─────────────────────────────────────────────────────── -->
+  <h2>1. Who We Are</h2>
+  <p>HomeFinder is a university project property portal that allows users to browse, save, and inquire about residential and commercial property listings. As a data controller we are responsible for the personal data you provide when using this service.</p>
+
+  <!-- ── 2. What Data We Collect ───────────────────────────────────────────── -->
+  <h2>2. What Personal Data We Collect</h2>
+  <table>
+    <thead><tr><th>Data</th><th>Source</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Name</strong></td><td>Registration form</td><td>Personalise your account and communications</td></tr>
+      <tr><td><strong>Email address</strong></td><td>Registration form</td><td>Account authentication, OTP verification, inquiry replies</td></tr>
+      <tr><td><strong>Password (hashed)</strong></td><td>Registration form</td><td>Secure login — stored as bcrypt hash, never readable</td></tr>
+      <tr><td><strong>Inquiry messages</strong></td><td>Property inquiry form</td><td>Forward your question to property agents</td></tr>
+      <tr><td><strong>Viewing request details</strong></td><td>Viewing request form</td><td>Schedule property viewings</td></tr>
+      <tr><td><strong>Saved properties</strong></td><td>Save/favourite button</td><td>Allow you to retrieve your shortlist</td></tr>
+      <tr><td><strong>Session token</strong></td><td>Login</td><td>Keep you signed in for 24 hours</td></tr>
+      <tr><td><strong>Anonymised IP address</strong></td><td>Server logs</td><td>Security audit trail — last octet masked (e.g. 1.2.3.xxx)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>We do not collect:</strong> payment details, phone numbers, physical addresses of users, location data, cookies beyond the session token, or any third-party tracking data.</p>
+
+  <!-- ── 3. Legal Basis ────────────────────────────────────────────────────── -->
+  <h2>3. Legal Basis for Processing (GDPR Art. 6)</h2>
+  <ul>
+    <li><strong>Contract performance</strong> — processing your registration and inquiries to provide the service you requested.</li>
+    <li><strong>Legitimate interests</strong> — maintaining anonymised audit logs for security purposes.</li>
+    <li><strong>Consent</strong> — optional marketing emails (if you ticked the marketing checkbox at registration).</li>
+  </ul>
+
+  <!-- ── 4. How We Use Your Data ───────────────────────────────────────────── -->
+  <h2>4. How We Use Your Data</h2>
+  <ul>
+    <li>To create and manage your account.</li>
+    <li>To send one-time password (OTP) verification codes via email.</li>
+    <li>To forward property inquiries to the relevant agent and deliver their replies to you.</li>
+    <li>To confirm or update viewing appointments.</li>
+    <li>To restore your saved/favourite property list across sessions.</li>
+    <li>To detect and prevent unauthorised account access (audit logs).</li>
+  </ul>
+
+  <!-- ── 5. Data Retention ─────────────────────────────────────────────────── -->
+  <h2>5. Data Retention</h2>
+  <ul>
+    <li><strong>Account data</strong> — retained until you delete your account.</li>
+    <li><strong>Session tokens</strong> — expire automatically after 24 hours.</li>
+    <li><strong>OTP codes</strong> — expire after 10 minutes and are deleted on use.</li>
+    <li><strong>Audit logs</strong> — retained for 12 months for security purposes; your identity is removed if you delete your account.</li>
+  </ul>
+
+  <!-- ── 6. Your Rights ────────────────────────────────────────────────────── -->
+  <h2>6. Your Rights Under GDPR</h2>
+  <table>
+    <thead><tr><th>Right</th><th>How to exercise it</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Right of Access</strong> (Art. 15)</td><td>Contact us — we will provide a copy of your data within 30 days.</td></tr>
+      <tr><td><strong>Right to Rectification</strong> (Art. 16)</td><td>Update your name in Account Settings → Personal Information.</td></tr>
+      <tr><td><strong>Right to Erasure</strong> (Art. 17)</td><td>Account Settings → Danger Zone → <em>Delete My Account</em>. Immediate and permanent.</td></tr>
+      <tr><td><strong>Right to Restrict Processing</strong> (Art. 18)</td><td>Contact us and we will suspend processing while a complaint is reviewed.</td></tr>
+      <tr><td><strong>Right to Data Portability</strong> (Art. 20)</td><td>Contact us for a JSON export of your personal data.</td></tr>
+      <tr><td><strong>Right to Object</strong> (Art. 21)</td><td>You may opt out of marketing emails at any time by unchecking your preference.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ── 7. Security ───────────────────────────────────────────────────────── -->
+  <h2>7. Security Measures</h2>
+  <ul>
+    <li>Passwords stored as bcrypt hashes (cost factor 12) — never readable by anyone.</li>
+    <li>All data in transit encrypted via HTTPS (TLS 1.2+).</li>
+    <li>Two-factor authentication via email OTP on every login.</li>
+    <li>Single-session enforcement — signing in on a new device invalidates previous sessions.</li>
+    <li>Rate limiting on login and OTP endpoints to prevent brute-force attacks.</li>
+    <li>IP addresses anonymised before storage (last octet masked).</li>
+  </ul>
+
+  <!-- ── 8. Cookies ───────────────────────────────────────────────────────── -->
+  <h2>8. Cookies</h2>
+  <p>We use a single <strong>httpOnly session cookie</strong> (<code>hf_token</code>) to keep you logged in for 24 hours. This cookie:</p>
+  <ul>
+    <li>Contains no personal data — only an opaque session identifier.</li>
+    <li>Is not accessible to JavaScript (httpOnly flag).</li>
+    <li>Is transmitted only over HTTPS in production (Secure flag).</li>
+    <li>Is deleted automatically when it expires or when you sign out.</li>
+  </ul>
+  <p>We use <strong>no tracking, analytics, or advertising cookies</strong> of any kind.</p>
+
+  <!-- ── 9. Third Parties ──────────────────────────────────────────────────── -->
+  <h2>9. Third-Party Services</h2>
+  <ul>
+    <li><strong>Turso (database)</strong> — cloud SQLite host. Data stored in EU region.</li>
+    <li><strong>Render.com (hosting)</strong> — cloud hosting platform. EU data processing agreement in place.</li>
+    <li><strong>OpenStreetMap Nominatim</strong> — used to geocode property addresses (property data only, no user data sent).</li>
+    <li><strong>Google Fonts</strong> — font delivery via CDN (no personal data shared).</li>
+    <li><strong>Unsplash</strong> — stock photos for demo property images.</li>
+  </ul>
+
+  <!-- ── 10. Contact ───────────────────────────────────────────────────────── -->
+  <h2>10. Contact &amp; Complaints</h2>
+  <p>For any privacy-related queries or to exercise your rights, please contact the data controller via the university project submission channel. You also have the right to lodge a complaint with your national supervisory authority (in the UK: the <strong>Information Commissioner's Office</strong>, ico.org.uk).</p>
+
+  <div style="margin-top:48px;padding:20px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);font-size:0.85rem;color:var(--text-muted);">
+    <strong>Note:</strong> HomeFinder is a university coursework project. While we have implemented GDPR-compliant practices as part of the software design requirements, this is not a commercial service and the data collected is for demonstration purposes only.
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+  updateNavForUser();
+</script>
+</body>
+</html>

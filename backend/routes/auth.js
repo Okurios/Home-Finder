@@ -151,6 +151,44 @@ router.post('/logout', async (req, res) => {
   }
 });
 
+// ─── DELETE /api/auth/account ────────────────────────────────────────────────
+// Right to Erasure (GDPR Art. 17) — permanently deletes the user's account and all their data
+const { requireAuth } = require('../middleware/auth');
+router.delete('/account', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Delete in dependency order (FK constraints)
+    await prisma.favourite.deleteMany({ where: { userId } });
+    await prisma.otpCode.deleteMany({ where: { userId } });
+    await prisma.session.deleteMany({ where: { userId } });
+    await prisma.viewingRequest.deleteMany({ where: { userId } });
+
+    // Delete inquiries (replies first due to FK)
+    const userInquiries = await prisma.inquiry.findMany({ where: { userId }, select: { id: true } });
+    const inqIds = userInquiries.map(i => i.id);
+    if (inqIds.length) {
+      await prisma.inquiryReply.deleteMany({ where: { inquiryId: { in: inqIds } } });
+      await prisma.inquiry.deleteMany({ where: { id: { in: inqIds } } });
+    }
+
+    // Anonymise audit log entries (keep for record, but scrub name/identity)
+    await prisma.auditLog.updateMany({
+      where: { userId },
+      data: { userId: null, detail: '[account deleted]' },
+    });
+
+    // Finally delete the user
+    await prisma.user.delete({ where: { id: userId } });
+
+    res.clearCookie('hf_token');
+    res.json({ message: 'Your account and all associated data have been permanently deleted.' });
+  } catch (err) {
+    console.error('[Auth] Delete account error:', err);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
 // ─── GET /api/auth/me ────────────────────────────────────────────────────────
 router.get('/me', async (req, res) => {
   try {

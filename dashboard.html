@@ -212,10 +212,15 @@
             </form>
           </div>
 
-          <div class="card card-body" style="max-width:520px;margin-top:20px;">
-            <h3 style="margin-bottom:16px;font-size:1rem;">Danger Zone</h3>
-            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:14px;">These actions are irreversible. Please proceed with caution.</p>
-            <button class="btn btn-danger btn-sm">Delete My Account</button>
+          <div class="card card-body" style="max-width:520px;margin-top:20px;border:1px solid var(--danger);">
+            <h3 style="margin-bottom:8px;font-size:1rem;color:var(--danger);">Danger Zone</h3>
+            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:14px;">
+              Deleting your account permanently removes your profile, inquiries, viewing requests, and saved properties. <strong>This cannot be undone.</strong>
+            </p>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:14px;">
+              This is your <strong>Right to Erasure</strong> under GDPR Article 17. See our <a href="privacy.html" class="auth-link">Privacy Policy</a>.
+            </p>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAccount()">🗑 Delete My Account</button>
           </div>
         </div>
 
@@ -394,6 +399,31 @@
     document.getElementById('userName').textContent = updated.name;
     showToast('Settings saved!', 'success');
   });
+
+  // ── Delete account (GDPR Right to Erasure) ──────────────────────────────────
+  async function confirmDeleteAccount() {
+    const confirmed = window.confirm(
+      '⚠️ Delete your account?\n\nThis will permanently erase:\n• Your profile\n• All inquiries & replies\n• All viewing requests\n• All saved properties\n\nThis action cannot be undone. Type OK to confirm.'
+    );
+    if (!confirmed) return;
+
+    const btn = document.querySelector('[onclick="confirmDeleteAccount()"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+
+    const res = await api('/api/auth/account', { method: 'DELETE' });
+    if (!res || !res.ok) {
+      const d = await res?.json().catch(() => ({}));
+      showToast(d?.error || 'Could not delete account.', '');
+      if (btn) { btn.disabled = false; btn.textContent = '🗑 Delete My Account'; }
+      return;
+    }
+
+    clearUser();
+    localStorage.removeItem('hf_favs');
+    localStorage.removeItem('hf_seen_inq');
+    localStorage.removeItem('hf_seen_view');
+    window.location.replace('index.html');
+  }
 
   renderOverview();
 </script>
