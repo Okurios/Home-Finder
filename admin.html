@@ -417,17 +417,27 @@
     }
     const saved   = await res.json();
     const savedId = saved.property?.id || editingId;
-    // Upload selected photos (if any) to the property
+    // Upload selected photos (if any) to the property — with 30s timeout
     const files = document.getElementById('lf-imgs').files;
     if (files.length > 0 && savedId) {
       btn.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`;
       const formData = new FormData();
       Array.from(files).forEach(f => formData.append('images', f));
-      await fetch(API_BASE + '/api/properties/' + savedId + '/images', {
-        method: 'POST',
-        headers: getToken() ? { Authorization: 'Bearer ' + getToken() } : {},
-        body: formData,
-      }).catch(() => {});
+      const ctrl  = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 30000); // abort after 30 s
+      try {
+        const upRes = await fetch(API_BASE + '/api/properties/' + savedId + '/images', {
+          method: 'POST',
+          headers: getToken() ? { Authorization: 'Bearer ' + getToken() } : {},
+          body: formData,
+          signal: ctrl.signal,
+        });
+        clearTimeout(timer);
+        if (!upRes.ok) showToast('Listing saved — but photos may not have uploaded. Try editing the listing again.', 'warn');
+      } catch (_) {
+        clearTimeout(timer);
+        showToast('Photo upload timed out. Listing was saved — re-open it to retry uploading photos.', 'warn');
+      }
     }
     btn.disabled = false; btn.textContent = 'Save Listing';
     showToast(editingId ? 'Listing updated!' : 'New listing added!', 'success');
