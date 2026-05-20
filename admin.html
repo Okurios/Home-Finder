@@ -332,16 +332,32 @@
     showToast('Listing removed successfully.', 'success');
   }
 
+  // ── Geocode a free-text address via OpenStreetMap Nominatim (no API key) ──
+  async function geocodeAddress(address) {
+    try {
+      const res = await fetch(
+        'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) + '&format=json&limit=1',
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'HomeFinder/1.0' } }
+      );
+      const data = await res.json();
+      if (data && data[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    } catch (_) {}
+    return { lat: 0, lng: 0 }; // fallback if geocode fails
+  }
+
   document.getElementById('listingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = this.querySelector('button[type=submit]');
     btn.disabled = true; btn.textContent = 'Saving…';
     const imgUrl = document.getElementById('lf-img').value || '';
+    const address = document.getElementById('lf-address').value;
+    // Auto-geocode address → real lat/lng (no hardcoded fallback)
+    const geo = await geocodeAddress(address);
     const payload = {
       title:       document.getElementById('lf-title').value,
       type:        document.getElementById('lf-type').value,
-      address:     document.getElementById('lf-address').value,
-      city:        document.getElementById('lf-address').value.split(',').pop().trim(),
+      address:     address,
+      city:        address.split(',').filter(Boolean).slice(-2, -1)[0]?.trim() || address.split(',').pop().trim(),
       status:      document.getElementById('lf-status').value,
       price:       parseFloat(document.getElementById('lf-price').value),
       beds:        parseInt(document.getElementById('lf-beds').value),
@@ -351,8 +367,8 @@
       imageUrl:    imgUrl,
       features:    '[]',
       parking:     false,
-      lat:         51.5,
-      lng:         -0.1,
+      lat:         geo.lat,
+      lng:         geo.lng,
     };
     const url = editingId ? `/api/properties/${editingId}` : '/api/properties';
     const method = editingId ? 'PUT' : 'POST';
