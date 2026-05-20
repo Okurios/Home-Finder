@@ -239,6 +239,38 @@
   </div>
 </div>
 
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h3>Edit User</h3>
+      <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
+    </div>
+    <div id="editUserName" style="font-weight:600;font-size:1rem;margin-bottom:16px;color:var(--primary);"></div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label>Role</label>
+        <select class="form-control" id="eu-role">
+          <option value="user">User</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" id="eu-status">
+          <option value="Active">Active</option>
+          <option value="Suspended">Suspended</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button>
+      <button class="btn btn-primary" id="euSaveBtn" onclick="saveUserEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- REPLY INQUIRY MODAL -->
 <div class="modal-overlay" id="replyModal">
   <div class="modal">
@@ -639,6 +671,8 @@
   }
 
   // ===================== USERS =====================
+  let editingUserId = null;
+
   async function renderAdminUsers() {
     const tbody = document.querySelector('#sec-users tbody');
     if (!tbody) return;
@@ -647,7 +681,10 @@
     if (!res) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;">Could not load users.</td></tr>'; return; }
     const data = await res.json();
     const users = data.users || [];
-    tbody.innerHTML = users.map(u => `
+    const me = getUser();
+    tbody.innerHTML = users.map(u => {
+      const isSelf = me && u.id === me.id;
+      return `
       <tr>
         <td style="font-weight:600;">${u.name || '—'}</td>
         <td>${u.email}</td>
@@ -656,10 +693,43 @@
         <td style="font-size:0.85rem;">${new Date(u.createdAt).toLocaleDateString('en-GB')}</td>
         <td>
           <div style="display:flex;gap:6px;">
-            <button class="btn btn-ghost btn-sm" onclick="showToast('Role management coming soon.','warn')">Edit Role</button>
+            ${isSelf
+              ? `<span style="font-size:0.78rem;color:var(--text-muted);padding:4px 8px;">Your account</span>`
+              : `<button class="btn btn-ghost btn-sm" onclick="openEditUser(${u.id},'${(u.name||'').replace(/'/g,"\\'")}','${u.role}','${u.status||'Active'}')">Edit Role</button>`
+            }
           </div>
         </td>
-      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">No users found.</td></tr>';
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">No users found.</td></tr>';
+  }
+
+  function openEditUser(id, name, role, status) {
+    editingUserId = id;
+    document.getElementById('editUserName').textContent = name;
+    document.getElementById('eu-role').value   = role;
+    document.getElementById('eu-status').value = status;
+    openModal('editUserModal');
+  }
+
+  async function saveUserEdit() {
+    const btn = document.getElementById('euSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const res = await api('/api/dashboard/users/' + editingUserId, {
+      method: 'PUT',
+      body: JSON.stringify({
+        role:   document.getElementById('eu-role').value,
+        status: document.getElementById('eu-status').value,
+      }),
+    });
+    btn.disabled = false; btn.textContent = 'Save Changes';
+    if (!res || !res.ok) {
+      const d = await res?.json().catch(() => ({}));
+      showToast(d?.error || 'Could not update user.', '');
+      return;
+    }
+    closeModal('editUserModal');
+    showToast('User updated successfully.', 'success');
+    renderAdminUsers();
   }
 
   function updateAdminStats() {

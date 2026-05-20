@@ -121,4 +121,38 @@ router.get('/users', requireAuth, async (req, res) => {
   }
 });
 
+// ─── PUT /api/dashboard/users/:id (admin only) ───────────────────────────────
+router.put('/users/:id', requireAuth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required.' });
+    }
+    const targetId = parseInt(req.params.id);
+    if (targetId === req.user.id) {
+      return res.status(400).json({ error: 'You cannot edit your own account.' });
+    }
+    const { role, status } = req.body;
+    const VALID_ROLES    = ['user', 'supervisor', 'admin'];
+    const VALID_STATUSES = ['Active', 'Suspended'];
+    if (role   && !VALID_ROLES.includes(role))     return res.status(400).json({ error: 'Invalid role.' });
+    if (status && !VALID_STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status.' });
+
+    const user = await prisma.user.findUnique({ where: { id: targetId } });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const updated = await prisma.user.update({
+      where: { id: targetId },
+      data: {
+        ...(role   !== undefined && { role }),
+        ...(status !== undefined && { status }),
+      },
+      select: { id: true, name: true, email: true, role: true, status: true, createdAt: true },
+    });
+    res.json({ user: updated });
+  } catch (err) {
+    console.error('[Dashboard] Update user error:', err);
+    res.status(500).json({ error: 'Could not update user.' });
+  }
+});
+
 module.exports = router;
