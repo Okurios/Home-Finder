@@ -371,6 +371,7 @@ function propertyCard(p) {
   const saved = isFav(p.id);
   const bedsStr = p.beds > 0 ? `<span class="property-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20v-4a2 2 0 012-2h16a2 2 0 012 2v4"/><rect x="7" y="10" width="10" height="4" rx="1"/><line x1="2" y1="16" x2="22" y2="16"/></svg>${p.beds} bd</span>` : '';
   const bathStr = p.baths > 0 ? `<span class="property-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6a3 3 0 016 0v6H3v-2a4 4 0 014-4z"/><rect x="2" y="12" width="20" height="4" rx="1"/></svg>${p.baths} ba</span>` : '';
+  const parkStr = p.parking ? `<span class="property-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg>Parking</span>` : '';
   return `
   <article class="property-card" onclick="location.href='property.html?id=${p.id}'">
     <div class="property-card-img">
@@ -392,6 +393,7 @@ function propertyCard(p) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
           ${p.sqft.toLocaleString()} ft²
         </span>
+        ${parkStr}
       </div>
     </div>
   </article>`;

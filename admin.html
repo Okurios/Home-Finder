@@ -208,6 +208,12 @@
         </div>
       </div>
       <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;">
+          <input type="checkbox" id="lf-parking" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;" />
+          Parking available
+        </label>
+      </div>
+      <div class="form-group">
         <label>Description</label>
         <textarea class="form-control" id="lf-desc" rows="3" placeholder="Property description…"></textarea>
       </div>
@@ -366,6 +372,7 @@
     document.getElementById('lf-baths').value = p.baths;
     document.getElementById('lf-sqft').value = p.sqft;
     document.getElementById('lf-desc').value = p.desc;
+    document.getElementById('lf-parking').checked = !!p.parking;
     resetFilePicker();
     // Render existing photos grid with individual delete buttons
     const section = document.getElementById('existingPhotosSection');
@@ -505,7 +512,7 @@
       sqft:        parseInt(document.getElementById('lf-sqft').value),
       description: document.getElementById('lf-desc').value,
       features:    '[]',
-      parking:     false,
+      parking:     document.getElementById('lf-parking').checked,
       lat:         geo.lat,
       lng:         geo.lng,
       imageUrls,
