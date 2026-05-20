@@ -228,6 +228,24 @@ router.put('/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// ─── DELETE /api/properties/:id/images/:imageId ──────────────────────────────
+router.delete('/:id/images/:imageId', requireAdmin, async (req, res) => {
+  try {
+    const propertyId = parseInt(req.params.id);
+    const imageId    = parseInt(req.params.imageId);
+    const img = await prisma.propertyImage.findUnique({ where: { id: imageId } });
+    if (!img || img.propertyId !== propertyId) {
+      return res.status(404).json({ error: 'Image not found.' });
+    }
+    await prisma.propertyImage.delete({ where: { id: imageId } });
+    await auditLog(req.user.id, 'PROPERTY_IMAGE_DELETE', `Deleted image ID ${imageId} from property ${propertyId}`, req.ip);
+    res.json({ message: 'Image deleted.' });
+  } catch (err) {
+    console.error('[Properties] Image delete error:', err);
+    res.status(500).json({ error: 'Could not delete image.' });
+  }
+});
+
 // ─── DELETE /api/properties/:id (soft delete) ────────────────────────────────
 router.delete('/:id', requireAdmin, async (req, res) => {
   try {

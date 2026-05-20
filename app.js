@@ -190,6 +190,7 @@ function normalizeProperty(p) {
     ...p,
     img: p.images?.[0]?.url || p.img || 'https://placehold.co/600x400/1A3C5E/fff?text=No+Image',
     imgs: p.images?.map(i => i.url) || (p.imgs ? p.imgs : (p.img ? [p.img] : [])),
+    imageObjects: p.images || [],
     desc: p.description ?? p.desc ?? '',
     features: Array.isArray(p.features) ? p.features
               : JSON.parse(p.features || '[]'),
