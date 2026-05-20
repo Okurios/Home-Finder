@@ -83,10 +83,28 @@ async function issueSession(user) {
   return token;
 }
 
+// Anonymise an IP address: mask last IPv4 octet or last IPv6 group
+function maskIp(ip) {
+  if (!ip) return '';
+  // IPv4: 1.2.3.4 → 1.2.3.xxx
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+    return ip.replace(/\.\d+$/, '.xxx');
+  }
+  // IPv4-mapped IPv6: ::ffff:1.2.3.4
+  if (ip.startsWith('::ffff:')) {
+    return '::ffff:' + maskIp(ip.slice(7));
+  }
+  // IPv6: mask last colon-separated group
+  if (ip.includes(':')) {
+    return ip.replace(/:[^:]+$/, ':xxxx');
+  }
+  return ip;
+}
+
 // Helper: log audit action
 async function auditLog(userId, action, detail, ip) {
   try {
-    await prisma.auditLog.create({ data: { userId: userId || null, action, detail: detail || '', ip: ip || '' } });
+    await prisma.auditLog.create({ data: { userId: userId || null, action, detail: detail || '', ip: maskIp(ip) } });
   } catch (_) {}
 }
 
