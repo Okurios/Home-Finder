@@ -380,8 +380,8 @@
       document.getElementById('similarGrid').innerHTML = similar.map(p => propertyCard(p)).join('');
     });
 
-    // Mortgage calculator
-    function calcMortgage() {
+    // Mortgage calculator — must be on window so oninput/onchange handlers can find it
+    window.calcMortgage = function() {
       const deposit = parseInt(document.getElementById('depositRange')?.value || 20);
       const term = parseInt(document.getElementById('termYears')?.value || 25);
       document.getElementById('depositPct').textContent = deposit + '%';
@@ -391,8 +391,8 @@
       const monthly = loan * rate * Math.pow(1 + rate, n) / (Math.pow(1 + rate, n) - 1);
       document.getElementById('calcResult').textContent = `~£${Math.round(monthly).toLocaleString()}/mo`;
       document.getElementById('calcNote').textContent = `Estimated at 4.5% APR, ${deposit}% deposit, ${term}yr term`;
-    }
-    if (prop.status === 'For Sale') calcMortgage();
+    };
+    if (prop.status === 'For Sale') window.calcMortgage();
   })();
 
   // ---- Inquiry / Viewing openers ----

@@ -45,7 +45,6 @@
     <h1 class="hero-title">Find Your Dream<br/><span>Home Today</span></h1>
     <p class="hero-sub">Explore thousands of properties — houses, apartments, and commercial spaces across the country.</p>
 
-    <!-- Zillow-style search box -->
     <div class="search-box" style="max-width:680px;">
       <div class="search-tabs">
         <button class="search-tab active" data-mode="buy">Buy</button>
@@ -77,20 +76,12 @@
   <div class="container">
     <div class="stats-row">
       <div class="stat-item">
-        <div class="stat-value">12,400+</div>
+        <div class="stat-value" id="statListings">…</div>
         <div class="stat-label">Active Listings</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">8,200+</div>
-        <div class="stat-label">Happy Clients</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">380+</div>
+        <div class="stat-value" id="statCities">…</div>
         <div class="stat-label">Cities Covered</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">98%</div>
-        <div class="stat-label">Satisfaction Rate</div>
       </div>
     </div>
   </div>
@@ -314,6 +305,19 @@
     const props = (data.properties || []).map(normalizeProperty);
     grid.innerHTML = props.map(p => propertyCard(p)).join('');
   }
+
+  // ---- Live stats from DB ----
+  (async function loadStats() {
+    try {
+      const res = await fetch(API_BASE + '/api/properties/stats');
+      if (!res.ok) return;
+      const data = await res.json();
+      const listingsEl = document.getElementById('statListings');
+      const citiesEl   = document.getElementById('statCities');
+      if (listingsEl) listingsEl.textContent = (data.totalActive || 0).toLocaleString();
+      if (citiesEl)   citiesEl.textContent   = (data.citiesCount || 0).toLocaleString();
+    } catch (_) {}
+  })();
 
   renderFeatured();
   renderNew();

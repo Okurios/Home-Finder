@@ -103,6 +103,25 @@ router.get('/featured', async (req, res) => {
   }
 });
 
+// ─── GET /api/properties/stats ───────────────────────────────────────────────
+// Public: returns real counts for the homepage stats row
+router.get('/stats', async (req, res) => {
+  try {
+    const [totalActive, cities] = await Promise.all([
+      prisma.property.count({ where: { isActive: true } }),
+      prisma.property.findMany({
+        where: { isActive: true, city: { not: '' } },
+        distinct: ['city'],
+        select: { city: true },
+      }),
+    ]);
+    res.json({ totalActive, citiesCount: cities.length });
+  } catch (err) {
+    console.error('[Properties] Stats error:', err);
+    res.status(500).json({ error: 'Could not retrieve stats.' });
+  }
+});
+
 // ─── GET /api/properties/:id ─────────────────────────────────────────────────
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
