@@ -101,10 +101,10 @@ function maskIp(ip) {
   return ip;
 }
 
-// Helper: log audit action
-async function auditLog(userId, action, detail, ip) {
+// Helper: log audit action — IP is intentionally not stored (GDPR data minimisation)
+async function auditLog(userId, action, detail) {
   try {
-    await prisma.auditLog.create({ data: { userId: userId || null, action, detail: detail || '', ip: maskIp(ip) } });
+    await prisma.auditLog.create({ data: { userId: userId || null, action, detail: detail || '', ip: '' } });
   } catch (_) {}
 }
 

@@ -61,10 +61,9 @@
       <tr><td><strong>Viewing request details</strong></td><td>Viewing request form</td><td>Schedule property viewings</td></tr>
       <tr><td><strong>Saved properties</strong></td><td>Save/favourite button</td><td>Allow you to retrieve your shortlist</td></tr>
       <tr><td><strong>Session token</strong></td><td>Login</td><td>Keep you signed in for 24 hours</td></tr>
-      <tr><td><strong>Anonymised IP address</strong></td><td>Server logs</td><td>Security audit trail — last octet masked (e.g. 1.2.3.xxx)</td></tr>
     </tbody>
   </table>
-  <p><strong>We do not collect:</strong> payment details, phone numbers, physical addresses of users, location data, cookies beyond the session token, or any third-party tracking data.</p>
+  <p><strong>We do not collect:</strong> IP addresses, payment details, phone numbers, physical addresses of users, location data, cookies beyond the session token, or any third-party tracking data.</p>
 
   <!-- ── 3. Legal Basis ────────────────────────────────────────────────────── -->
   <h2>3. Legal Basis for Processing (GDPR Art. 6)</h2>
@@ -116,8 +115,7 @@
     <li>Two-factor authentication via email OTP on every login.</li>
     <li>Single-session enforcement — signing in on a new device invalidates previous sessions.</li>
     <li>Rate limiting on login and OTP endpoints to prevent brute-force attacks.</li>
-    <li>IP addresses anonymised before storage (last octet masked, e.g. <code>1.2.3.xxx</code>).</li>
-    <li>IP data is visible only to <strong>Admins</strong> for security oversight. Supervisors do not have access to IP data (GDPR data minimisation, Art. 5(1)(c)).</li>
+    <li>IP addresses are <strong>never stored</strong> (GDPR data minimisation, Art. 5(1)(c)).</li>
   </ul>
 
   <!-- ── 8. Cookies ───────────────────────────────────────────────────────── -->
